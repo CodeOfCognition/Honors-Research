@@ -19,13 +19,11 @@ def processFile(fileName):
         comment_pat = '\n(.*)' # what comes after the first line
 
         entries = re.findall(entry_pat, fin, re.DOTALL)
-        # print(entries)
 
         times = list()
         subreddits = list()
         comments = list()
         commentWC = list()
-        # tokenizer = RegexpTokenizer(r'\w+')
 
         numEntries = len(entries)
         j = 0
@@ -35,7 +33,7 @@ def processFile(fileName):
                 subreddit = re.search(subreddit_pat, entries[i]).group(1)
                 comment = re.search(comment_pat, entries[i], re.DOTALL).group(1)
             except:
-                print('Error on filename "' + filename + '"\nEntry #' + str(i))
+                print('Error on filename "' + fileName + '"\nEntry #' + str(i))
                 print("Error entry: " + entries[i])
                 continue
             times.append(time)
