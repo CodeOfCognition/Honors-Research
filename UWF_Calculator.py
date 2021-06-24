@@ -27,8 +27,8 @@ def runFile(fileName):
                 time = re.search(time_pat, entries[i]).group()
                 comment = re.search(comment_pat, entries[i], re.DOTALL).group(1)
             except:
-                print('Error on filename "' + fileName + '"\nEntry #' + str(i))
-                print("Error entry: " + entries[i])
+                # print('Error on filename "' + fileName + '"\nEntry #' + str(i))
+                # print("Error entry: " + entries[i])
                 continue
             times.append(time)
             comments.append(comment) #tokenizer.tokenize(comment)
@@ -40,7 +40,7 @@ def runFile(fileName):
     sortedData = rawData.sort_values('time', ascending=(True)).reset_index()
     sortedData.to_csv('test.csv')
 
-    with open("train_words.txt", "rt") as f:
+    with open("new_train_words.txt", "rt") as f:
         fin = f.read()
         train_words = fin.split()
         f.close
@@ -119,14 +119,12 @@ directoryName = 'corpora_10_users'
 i = 1
 for filename in os.listdir(directoryName):
         if filename.endswith(".txt"):
-            print ("starting file " + str(i) + ": " + filename)
+            print ("running file " + str(i) + ": " + filename)
             runFile('./corpora_10_users/' + filename)
-            print ("finished file " + str(i) + ": " + filename)
             i += 1
 analyze(cosineValues)
+#README! Need to add lower casing and remove punctuation
             
-    
-#Combine what is above and below this line. We want to iterate over the data the minimum possible times. Right now,
-# it may take 3 traversals of the redditData, but we can perhaps do it in two
+
 
     
