@@ -199,7 +199,8 @@ def genHistogram():
         vc24.append(round(valueList[4], 2))
         vc34.append(round(valueList[5], 2))
     similarityDF = pd.DataFrame({'vc12': vc12,'vc13': vc13,'vc14': vc12, 'vc23': vc23,'vc24': vc24,'vc34': vc34})
-    
+    hist1 = similarityDF.hist(bins=50, column=['vc12', 'vc13', 'vc14'])
+    p.show()
 
 def run(corporaDirectory, trainWordsFile, numTrainWords):
 
