@@ -5,9 +5,13 @@ import pandas as pd
 from scipy import spatial
 import math
 import os
+import time
+import matplotlib.pyplot as p
 
-def runFile(fileName):
-    with open(fileName, "rt") as f:
+start_time = time.time()
+
+def runFile(corpus, trainWordsFile, numTrainWords):
+    with open(corpus, "rt") as f:
         fin = f.read()
 
         entry_pat = "\*--\s(.*?)--\*" # Separates entries
@@ -38,14 +42,17 @@ def runFile(fileName):
     
     rawData = pd.DataFrame({'time': times,'tokenCount': commentWC,'comment': comments})
     sortedData = rawData.sort_values('time', ascending=(True)).reset_index()
-    sortedData.to_csv('test.csv')
+    # sortedData.to_csv('test.csv')
 
-    with open("new_train_words.txt", "rt") as f:
+    with open(trainWordsFile, "rt") as f:
         fin = f.read()
         train_words = fin.split()
         f.close
+ 
+    
+    
 
-    zeros = [0]*80346 # array of zeros; 80346 is the number of train_words (words I want WF counts of)
+    zeros = [0]*numTrainWords # size of WF vector
     dictionary1 = dict(zip(train_words, zeros)) 
     dictionary2 = dict(zip(train_words, zeros)) 
     dictionary3 = dict(zip(train_words, zeros)) 
@@ -84,46 +91,136 @@ def runFile(fileName):
     vc12 = 1-spatial.distance.cosine(f1, f2)
     vc13 = 1-spatial.distance.cosine(f1, f3)
     vc14 = 1-spatial.distance.cosine(f1, f4)
-    cosineValues.append([vc12,vc13,vc14])
+    vc23 = 1-spatial.distance.cosine(f2, f3)
+    vc24 = 1-spatial.distance.cosine(f2, f4)
+    vc34 = 1-spatial.distance.cosine(f3, f4)
+    cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
+    # print(cosineValues)
 
 def analyze(cosineArray):
     vc12Ave = 0
     vc13Ave = 0
     vc14Ave = 0
+    vc23Ave = 0
+    vc24Ave = 0
+    vc34Ave = 0
     vc12SD = 0
     vc13SD = 0
     vc14SD = 0
+    vc23SD = 0
+    vc24SD = 0
+    vc34SD = 0
     count = 0
     for cosineValue in cosineArray:
         vc12Ave += cosineValue[0]
         vc13Ave += cosineValue[1]
         vc14Ave += cosineValue[2]
+        vc23Ave += cosineValue[3]
+        vc24Ave += cosineValue[4]
+        vc34Ave += cosineValue[5]
         count +=1
     if count != 0:
         vc12Ave = vc12Ave/count
         vc13Ave = vc13Ave/count
         vc14Ave = vc14Ave/count
+        vc23Ave = vc23Ave/count
+        vc24Ave = vc24Ave/count
+        vc34Ave = vc34Ave/count
         for cosineValue in cosineArray:
             vc12SD += abs(cosineValue[0] - vc12Ave)**2
             vc13SD += abs(cosineValue[1] - vc13Ave)**2
             vc14SD += abs(cosineValue[2] - vc14Ave)**2
+            vc23SD += abs(cosineValue[3] - vc23Ave)**2
+            vc24SD += abs(cosineValue[4] - vc24Ave)**2
+            vc34SD += abs(cosineValue[5] - vc34Ave)**2
         vc12SD = math.sqrt(vc12SD/count)
         vc13SD = math.sqrt(vc13SD/count)
         vc14SD = math.sqrt(vc14SD/count)
+        vc23SD = math.sqrt(vc23SD/count)
+        vc24SD = math.sqrt(vc24SD/count)
+        vc34SD = math.sqrt(vc34SD/count)
     else:
         print("Error: no values to calculate")
-    print("\nAfter " + str(count) + "trials, \n 1to2: " + str(vc12Ave) + "\tSD: " + str(vc12SD)+ "\n 1to3: " + str(vc13Ave) + "\tSD: " + str(vc13SD)+ "\n 1to4: "+ str(vc14Ave) + "\tSD: " + str(vc14SD))
+    print("\nAfter " + str(count) + "trials, \n 1to2: " + str(vc12Ave) + "\tSD: " + str(vc12SD)+ "\n 1to3: " + str(vc13Ave) + "\tSD: " + str(vc13SD)+ "\n 1to4: "+ str(vc14Ave) + "\tSD: " + str(vc14SD)+ "\n 2to3: " + str(vc23Ave) + "\tSD: " + str(vc23SD)+ "\n 2to4: " + str(vc24Ave) + "\tSD: " + str(vc24SD)+ "\n 3to4: " + str(vc34Ave) + "\tSD: " + str(vc34SD))
+    print(str(vc12Ave) + "\n" + str(vc12SD) + "\n" + str(vc13Ave) + "\n" + str(vc13SD) + "\n" + str(vc14Ave) + "\n" + str(vc14SD) + "\n" + str(vc23Ave) + "\n" + str(vc23SD) + "\n" + str(vc24Ave) + "\n" + str(vc24SD) + "\n" + str(vc34Ave) + "\n" + str(vc34SD))
 
+
+
+
+def generateTrainWordsWithoutStop(n):
+    with open("sorted_train_words.txt", "rt") as f:
+        fin = f.read()
+        train_words1 = fin.split()
+        f.close
+    with open("stopList.txt", "rt") as f:
+        fin = f.read()
+        stopList = fin.split()
+        f.close
+    for stop in stopList:
+        if stop in train_words1:
+            train_words1.remove(stop)
+    train_words2 = []
+    for i in range(0, n):
+        train_words2.append(train_words1[i])
+    try:
+        f = open(str(i+1) + "_words_stops_removed.txt", "x")
+    except:
+        f = open(str(i+1) + "_words_stops_removed.txt", "w")
+    for word in train_words2:
+        f.write(word + '\n')
+
+def generateTrainWordsWithStop(n):
+    with open("sorted_train_words.txt", "rt") as f:
+        fin = f.read()
+        train_words1 = fin.split()
+        f.close
+    train_words2 = []
+    for i in range(0, n):
+        train_words2.append(train_words1[i])
+    try:
+        f = open(str(i+1) + "_words_stops_included.txt", "x")
+    except:
+        f = open(str(i+1) + "_words_stops_included.txt", "w")
+    for word in train_words2:
+        f.write(word + '\n')
+
+def genHistogram():
+    vc12 = list()
+    vc13 = list()
+    vc14 = list()
+    vc23 = list()
+    vc24 = list()
+    vc34 = list()
+    for valueList in cosineValues: #vc12,vc13,vc14,vc23,vc24,vc34
+        vc12.append(round(valueList[0], 2))
+        vc13.append(round(valueList[1], 2))
+        vc14.append(round(valueList[2], 2))
+        vc23.append(round(valueList[3], 2))
+        vc24.append(round(valueList[4], 2))
+        vc34.append(round(valueList[5], 2))
+    similarityDF = pd.DataFrame({'vc12': vc12,'vc13': vc13,'vc14': vc12, 'vc23': vc23,'vc24': vc24,'vc34': vc34})
+    
+
+def run(corporaDirectory, trainWordsFile, numTrainWords):
+
+    i = 1
+    for filename in os.listdir(corporaDirectory):
+            if filename.endswith(".txt"):
+                if (i%100 == 0):
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                if (i%10 == 0):
+                    print("running file " + str(i) + ": " + filename)
+                runFile(('./' + str(corporaDirectory) + '/' + filename), trainWordsFile, numTrainWords)
+                i += 1
+    analyze(cosineValues)
+    print("--- %s seconds ---" % (time.time() - start_time))
+    print(str(corporaDirectory) + "\t" + str(trainWordsFile) + "\t" + str(numTrainWords))
+
+generateTrainWordsWithoutStop(80346)
+# generateTrainWordsWithStop(200000)
 cosineValues = list()
-directoryName = 'corpora_10_users'
-i = 1
-for filename in os.listdir(directoryName):
-        if filename.endswith(".txt"):
-            print ("running file " + str(i) + ": " + filename)
-            runFile('./corpora_10_users/' + filename)
-            i += 1
-analyze(cosineValues)
-#README! Need to add lower casing and remove punctuation
+run('1200_corpora', '80346_words_stops_removed.txt', 80346)
+
             
 
 

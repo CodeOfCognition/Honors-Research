@@ -1,6 +1,9 @@
 import os
 import re
 from nltk.probability import FreqDist
+import time
+
+start_time = time.time()
 
 def runFile(fileName):
     with open(fileName, "rt") as f:
@@ -36,18 +39,26 @@ def runFile(fileName):
 
 train_words = FreqDist()
 i = 1
-for filename in os.listdir('corpora_10_users'):
+for filename in os.listdir('1200_corpora'):
         if filename.endswith(".txt"):
-            print ("Running file " + str(i) + ": " + filename)
-            runFile('./corpora_10_users/' + filename)
+            if (i%10 == 0):
+                print("--- %s seconds ---" % (time.time() - start_time))
+                print ("Running file " + str(i) + ": " + filename)
+            runFile('./1200_corpora/' + filename)
             i += 1
-most_common = train_words.most_common(100000)
+most_common = train_words.most_common(10)
+print("most common are: " + str(most_common))
+sorted_train_words = sorted(train_words.items(), key=lambda x: x[1], reverse=True)
 try:
-    f = open("new_train_words.txt", "x")
+    f = open("sorted_train_words.txt", "x")
 except:
-    f = open("new_train_words.txt", "w")
-for pair in most_common:
+    f = open("sorted_train_words.txt", "w")
+i = 1
+for pair in sorted_train_words:
+    if i == 400000:
+        break
     f.write(pair[0] + '\n')
+    i += 1
 
-
-#Consider removing stop words
+print("--- %s seconds ---" % (time.time() - start_time))
+#Consider removing stop words 
