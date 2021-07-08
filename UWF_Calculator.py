@@ -58,12 +58,21 @@ def runFile(corpus, trainWordsFile, numTrainWords):
     dictionary3 = dict(zip(train_words, zeros)) 
     dictionary4 = dict(zip(train_words, zeros)) 
 
+#added 63, modified 68-75
+
+    punc = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
     tempData = list()
     redditData = list()
     tempData = (sortedData['comment'].str.cat(sep=' ').split())
     for word in tempData:
-        if word in dictionary1:
-            redditData.append(word)
+        if word.lower() in dictionary1:
+            redditData.append(word.lower())
+        else:
+            for letter in word:
+                        if letter in punc: 
+                            word = word.replace(letter, "") 
+            if word.lower() in dictionary1:
+                redditData.append(word.lower())
     totalWords = len(redditData)
 
     check = 0
@@ -96,8 +105,8 @@ def runFile(corpus, trainWordsFile, numTrainWords):
     vc34 = 1-spatial.distance.cosine(f3, f4)
     cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
     # print(cosineValues)
-    if (vc12 < .4 or vc23 <.4 or vc34 < .4):
-        abnormalUsers.append(corpus)
+    # if (vc12 < .4 or vc23 <.4 or vc34 < .4):
+    #     abnormalUsers.append(corpus)
 
 def analyze(cosineArray):
     vc12Ave = 0
@@ -266,9 +275,9 @@ def run(corporaDirectory, trainWordsFile, numTrainWords):
 # generateTrainWordsWithoutStop(150000)
 # generateTrainWordsWithStop(150000)
 cosineValues = list()
-abnormalUsers = list()
-run('1200_corpora', '150000_words_stops_included.txt', 150000)
-print(abnormalUsers)
+# abnormalUsers = list()
+run('1200_corpora', '150000_words_stops_removed.txt', 150000)
+# print(abnormalUsers)
 genHistogram("(1200 users, 150000 derived, with stops)")
              
 
