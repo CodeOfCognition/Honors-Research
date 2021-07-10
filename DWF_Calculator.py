@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 start_time = time.time()
 
-def runFile(corpus, trainWordsFile, numTrainWords, minimumThreshold):
+def runFile(corpus, trainWordsFile, numTrainWords, threshold):
     with open(corpus, "rt") as f:
         fin = f.read()
 
@@ -34,13 +34,10 @@ def runFile(corpus, trainWordsFile, numTrainWords, minimumThreshold):
                 subreddit = re.search(subreddit_pat, entries[i]).group(1)
                 comment = re.search(comment_pat, entries[i], re.DOTALL).group(1)
             except:
-                # print('Error on filename "' + corpus + '"\nEntry #' + str(i))
-                # print("Error entry: " + entries[i])
                 continue
             times.append(time)
             subreddits.append(subreddit)
-
-            comments.append(comment) #tokenizer.tokenize(comment)
+            comments.append(comment) 
             commentWC.append(len(comments[j].split()))
             j += 1
             # print("Comment length: " + str(commentWC[i]))
@@ -55,7 +52,6 @@ def runFile(corpus, trainWordsFile, numTrainWords, minimumThreshold):
     j = 0
     currentSubreddit = sortedData['subreddit'][0]
     counter = 0
-    threshold = minimumThreshold
     rangeAndCount = list()
     for index, row in sortedData.iterrows():
         if (currentSubreddit == sortedData['subreddit'][j]): #same subreddit
@@ -67,12 +63,13 @@ def runFile(corpus, trainWordsFile, numTrainWords, minimumThreshold):
             counter = int(sortedData['tokenCount'][j])
             j+=1
         else: #new subreddit, last subreddit was above threshold
-            rangeAndCount.append([i,j,counter, currentSubreddit])
+            rangeAndCount.append([i,j,counter, currentSubreddit]) #comments i through j span all comments of the subreddit
+            dwfSubreddits.append(currentSubreddit)
             i=j
             currentSubreddit = sortedData['subreddit'][j]
             counter = int(sortedData['tokenCount'][j])
             j+=1
-    if (counter>=threshold): #handles final subreddit in sortedData
+    if (counter>=threshold): #handles final comment in sortedData
         rangeAndCount.append([i,j-1,counter, currentSubreddit])
 
 
@@ -81,28 +78,6 @@ def runFile(corpus, trainWordsFile, numTrainWords, minimumThreshold):
         train_words = fin.split()
         f.close
 
-    # zeros = [0]*numTrainWords # size of WF vector
-    # dictionary1 = dict(zip(train_words, zeros)) 
-    # dictionary2 = dict(zip(train_words, zeros)) 
-    # dictionary3 = dict(zip(train_words, zeros)) 
-    # dictionary4 = dict(zip(train_words, zeros)) 
-
-    # tempData = list()
-    # cleanData = list()
-    # subredditData = list()
-    # for r in rangeAndCount:
-    #     tempData = sortedData['comment'][r[0]:r[1]+1].str.cat(sep=' ').split() #takes all comments of subreddit
-    #     for word in tempData:
-    #         if word in dictionary1:
-    #             cleanData.append(word)
-    #     subredditData.append(cleanData)
-    #     cleanData = list()
-
-    # tempData = (sortedData['comment'].str.cat(sep=' ').split())
-    # for word in tempData:
-    #     if word in dictionary1:
-    #         redditData.append(word)
-    # totalWords = len(redditData)
 
 
     subredditData = list()
@@ -122,42 +97,44 @@ def runFile(corpus, trainWordsFile, numTrainWords, minimumThreshold):
         count = 0
         cleanWords = list()
         for word in words:
-            if word.lower() in dictionary1:
-                cleanWords.append(word.lower())
+            word = word.lower()
+            if word in dictionary1:
+                cleanWords.append(word)
             else:
                 for letter in word:
                         if letter in punc: 
                             word = word.replace(letter, "") 
-                if word.lower() in dictionary1:
-                    cleanWords.append(word.lower())
+                if word in dictionary1:
+                    cleanWords.append(word)
         totalWords = len(cleanWords)
-        for word in cleanWords:
-            if count <= (totalWords/4):
-                dictionary1[word] += 1
-                count += 1
-            elif count <= ((totalWords)/2):
-                dictionary2[word] += 1
-                count += 1
-            elif count <= ((3*totalWords)/4):
-                dictionary3[word] += 1
-                count += 1
-            else:
-                dictionary4[word] += 1
-                count += 1
+        if totalWords >= threshold:
+            for word in cleanWords:
+                if count <= (totalWords/4):
+                    dictionary1[word] += 1
+                    count += 1
+                elif count <= ((totalWords)/2):
+                    dictionary2[word] += 1
+                    count += 1
+                elif count <= ((3*totalWords)/4):
+                    dictionary3[word] += 1
+                    count += 1
+                else:
+                    dictionary4[word] += 1
+                    count += 1
 
-        x = pd.DataFrame({'Words': dictionary1.keys(), 'Frequency1': dictionary1.values(), 'Frequency2': dictionary2.values(), 'Frequency3': dictionary3.values(), 'Frequency4': dictionary4.values()})
-        f1 = list(dictionary1.values())
-        f2 = list(dictionary2.values())
-        f3 = list(dictionary3.values())
-        f4 = list(dictionary4.values())
+            # x = pd.DataFrame({'Words': dictionary1.keys(), 'Frequency1': dictionary1.values(), 'Frequency2': dictionary2.values(), 'Frequency3': dictionary3.values(), 'Frequency4': dictionary4.values()})
+            f1 = list(dictionary1.values())
+            f2 = list(dictionary2.values())
+            f3 = list(dictionary3.values())
+            f4 = list(dictionary4.values())
 
-        vc12 = 1-spatial.distance.cosine(f1, f2)
-        vc13 = 1-spatial.distance.cosine(f1, f3)
-        vc14 = 1-spatial.distance.cosine(f1, f4)
-        vc23 = 1-spatial.distance.cosine(f2, f3)
-        vc24 = 1-spatial.distance.cosine(f2, f4)
-        vc34 = 1-spatial.distance.cosine(f3, f4)
-        cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
+            vc12 = 1-spatial.distance.cosine(f1, f2)
+            vc13 = 1-spatial.distance.cosine(f1, f3)
+            vc14 = 1-spatial.distance.cosine(f1, f4)
+            vc23 = 1-spatial.distance.cosine(f2, f3)
+            vc24 = 1-spatial.distance.cosine(f2, f4)
+            vc34 = 1-spatial.distance.cosine(f3, f4)
+            cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
 
 def analyze(cosineArray):
     vc12Ave = 0
@@ -201,10 +178,17 @@ def analyze(cosineArray):
         vc23SD = math.sqrt(vc23SD/count)
         vc24SD = math.sqrt(vc24SD/count)
         vc34SD = math.sqrt(vc34SD/count)
+
+        vc12SE = vc12SD/(math.sqrt(count))
+        vc13SE = vc13SD/(math.sqrt(count))
+        vc14SE = vc14SD/(math.sqrt(count))
+        vc23SE = vc23SD/(math.sqrt(count))
+        vc24SE = vc24SD/(math.sqrt(count))
+        vc34SE = vc34SD/(math.sqrt(count))
     else:
         print("Error: no values to calculate")
-    print("\nAfter " + str(count) + "trials, \n 1to2: " + str(vc12Ave) + "\tSD: " + str(vc12SD)+ "\n 1to3: " + str(vc13Ave) + "\tSD: " + str(vc13SD)+ "\n 1to4: "+ str(vc14Ave) + "\tSD: " + str(vc14SD)+ "\n 2to3: " + str(vc23Ave) + "\tSD: " + str(vc23SD)+ "\n 2to4: " + str(vc24Ave) + "\tSD: " + str(vc24SD)+ "\n 3to4: " + str(vc34Ave) + "\tSD: " + str(vc34SD))
-    print(str(vc12Ave) + "\n" + str(vc12SD) + "\n" + str(vc13Ave) + "\n" + str(vc13SD) + "\n" + str(vc14Ave) + "\n" + str(vc14SD) + "\n" + str(vc23Ave) + "\n" + str(vc23SD) + "\n" + str(vc24Ave) + "\n" + str(vc24SD) + "\n" + str(vc34Ave) + "\n" + str(vc34SD))
+    print("\nAfter " + str(count) + "trials, \n 1to2: " + str(vc12Ave) + "\tSD: " + str(vc12SD)+ "\tSE: " + str(vc12SE) + "\n 1to3: " + str(vc13Ave) + "\tSD: " + str(vc13SD)+ "\tSE: " + str(vc13SE) + "\n 1to4: "+ str(vc14Ave) + "\tSD: " + str(vc14SD)+ "\tSE: " + str(vc14SE) + "\n 2to3: " + str(vc23Ave) + "\tSD: " + str(vc23SD)+ "\tSE: " + str(vc23SE) + "\n 2to4: " + str(vc24Ave) + "\tSD: " + str(vc24SD)+ "\tSE: " + str(vc24SE) + "\n 3to4: " + str(vc34Ave) + "\tSD: " + str(vc34SD) + "\tSE: " + str(vc12SE))
+    print(str(vc12Ave) + "\n" + str(vc12SD) + "\n" + str(vc12SE) + "\n" + str(vc13Ave) + "\n" + str(vc13SD) + "\n" + str(vc13SE) + "\n" + str(vc14Ave) + "\n" + str(vc14SD) + "\n" + str(vc14SE) + "\n" + str(vc23Ave) + "\n" + str(vc23SD) + "\n" + str(vc23SE) + "\n" + str(vc24Ave) + "\n" + str(vc24SD) + "\n" + str(vc24SE) + "\n" + str(vc34Ave) + "\n" + str(vc34SD) +  "\n" + str(vc34SE))
 
 def genHistogram(titlename):
     vc12 = list()
@@ -227,51 +211,53 @@ def genHistogram(titlename):
     hist1 = similarityDF.hist(bins=bins100, column='vc12', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.94)
-    plt.xlim(0,1)
+    plt.ylim(0,.10)
+    plt.xlim(.5,1)
     plt.title("Cosine similarity times 1 to 2 \n" + titlename)
     hist2 = similarityDF.hist(bins=bins100, column='vc13', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.94)
-    plt.xlim(0,1)
+    plt.ylim(0,.10)
+    plt.xlim(.5,1)
     plt.title("Cosine similarity times 1 to 3 \n" + titlename)
     hist3 = similarityDF.hist(bins=bins100, column='vc14', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.94)
-    plt.xlim(0,1)
+    plt.ylim(0,.10)
+    plt.xlim(.5,1)
     plt.title("Cosine similarity times 1 to 4 \n" + titlename)
     hist4 = similarityDF.hist(bins=bins100, column='vc23', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.94)
-    plt.xlim(0,1)
+    plt.ylim(0,.10)
+    plt.xlim(.5,1)
     plt.title("Cosine similarity times 2 to 3 \n" + titlename)
     hist5 = similarityDF.hist(bins=bins100, column='vc24', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.94)
-    plt.xlim(0,1)
+    plt.ylim(0,.10)
+    plt.xlim(.5,1)
     plt.title("Cosine similarity times 2 to 4 \n" + titlename)
     hist6 = similarityDF.hist(bins=bins100, column='vc34', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.94)
-    plt.xlim(0,1)
+    plt.ylim(0,.10)
+    plt.xlim(.5,1)
     plt.title("Cosine similarity times 3 to 4 \n" + titlename)
     plt.show()
 
-def run(corporaDirectory, trainWordsFile, numTrainWords, minimumThreshold):
+
+
+def run(corporaDirectory, trainWordsFile, numTrainWords, threshold):
 
     i = 1
     for filename in os.listdir(corporaDirectory):
             if filename.endswith(".txt"):
                 if (i%100 == 0):
                     print("--- %s seconds ---" % (time.time() - start_time))
-                if (i%1 == 0):
+                if (i%10 == 0):
                     print("running file " + str(i) + ": " + filename)
-                runFile(('./' + str(corporaDirectory) + '/' + filename), trainWordsFile, numTrainWords, minimumThreshold)
+                runFile(('./' + str(corporaDirectory) + '/' + filename), trainWordsFile, numTrainWords, threshold)
                 i += 1
     analyze(cosineValues)
     print("--- %s seconds ---" % (time.time() - start_time))
@@ -280,19 +266,26 @@ def run(corporaDirectory, trainWordsFile, numTrainWords, minimumThreshold):
 
 
 cosineValues = list() # [[1 to 2, 1 to 3, 1 to 4], [], [] ...]
+dwfSubreddits = list()
+
+threshold = 40000
+nUsers = 1200
 
 
-run('50_corpora', '150000_words_stops_removed.txt', 150000, 30000) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
-genHistogram("(10 users, 150000 derived, no stops)")
-# directoryName = 'corpora_10_users'
-# i = 1
-# for filename in os.listdir(directoryName):
-#         if filename.endswith(".txt"):
-#             print ("starting file " + str(i) + ": " + filename)
-#             runFile('./corpora_10_users/' + filename)
-#             print ("finished file " + str(i) + ": " + filename)
-#             i += 1
-# analyze(cosineValues)
+run(str(nUsers) + '_corpora', '150000_words_stops_removed.txt', 150000, threshold) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
+
+try:
+    f = open("DWF_Subreddits_threshold_" + str(threshold) + "_users_" + str(nUsers) + ".txt", "x")
+    for subreddit in dwfSubreddits:
+        f.write(subreddit + '\n')
+    f.close()
+except:
+    f = open("DWF_Subreddits_threshold_" + str(threshold) + "_users_" + str(nUsers) + ".txt", "w")
+    for subreddit in dwfSubreddits:
+        f.write(subreddit + '\n')
+    f.close()
+
+genHistogram("(DWF: " + str(nUsers) + "users, 80346 derived, no stops, " + str(threshold) + "minimum)")
 
 
 print("--- %s seconds ---" % (time.time() - start_time))
