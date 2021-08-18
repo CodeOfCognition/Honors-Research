@@ -7,6 +7,12 @@ import numpy as np
 
 start_time = time.time()
 
+#
+##
+### PLEASE ACKNOWLEDGE: Was not fully finished. Idea was scrapped during development
+##
+#
+
 
 def run(corpus):
     with open(corpus, "rt") as f:

@@ -211,37 +211,37 @@ def genHistogram(titlename):
     hist1 = similarityDF.hist(bins=bins100, column='vc12', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.10)
+    plt.ylim(0,.13)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 1 to 2 \n" + titlename)
     hist2 = similarityDF.hist(bins=bins100, column='vc13', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.10)
+    plt.ylim(0,.13)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 1 to 3 \n" + titlename)
     hist3 = similarityDF.hist(bins=bins100, column='vc14', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.10)
+    plt.ylim(0,.13)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 1 to 4 \n" + titlename)
     hist4 = similarityDF.hist(bins=bins100, column='vc23', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.10)
+    plt.ylim(0,.13)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 2 to 3 \n" + titlename)
     hist5 = similarityDF.hist(bins=bins100, column='vc24', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.10)
+    plt.ylim(0,.13)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 2 to 4 \n" + titlename)
     hist6 = similarityDF.hist(bins=bins100, column='vc34', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.10)
+    plt.ylim(0,.13)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 3 to 4 \n" + titlename)
     plt.show()
@@ -261,31 +261,19 @@ def run(corporaDirectory, trainWordsFile, numTrainWords, threshold):
                 i += 1
     analyze(cosineValues)
     print("--- %s seconds ---" % (time.time() - start_time))
-    print(str(corporaDirectory) + "\t" + str(trainWordsFile) + "\t" + str(numTrainWords))
+    print("users: " + str(nUsers) + "\tVector Words: " + str(trainWordsFile) + "\tThreshold: " + str(threshold))
+    
 
 
 
 cosineValues = list() # [[1 to 2, 1 to 3, 1 to 4], [], [] ...]
 dwfSubreddits = list()
 
+trainWordsFile = '300000_words_stops_removed.txt'
 threshold = 40000
 nUsers = 1200
 
 
-run(str(nUsers) + '_corpora', '150000_words_stops_removed.txt', 150000, threshold) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
+run(str(nUsers) + '_corpora', trainWordsFile, 300000, threshold) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
 
-try:
-    f = open("DWF_Subreddits_threshold_" + str(threshold) + "_users_" + str(nUsers) + ".txt", "x")
-    for subreddit in dwfSubreddits:
-        f.write(subreddit + '\n')
-    f.close()
-except:
-    f = open("DWF_Subreddits_threshold_" + str(threshold) + "_users_" + str(nUsers) + ".txt", "w")
-    for subreddit in dwfSubreddits:
-        f.write(subreddit + '\n')
-    f.close()
-
-genHistogram("(DWF: " + str(nUsers) + "users, 80346 derived, no stops, " + str(threshold) + "minimum)")
-
-
-print("--- %s seconds ---" % (time.time() - start_time))
+genHistogram("(DWF: " + str(nUsers) + "users, 300000 derived, no stops, " + str(threshold) + "minimum)")

@@ -156,6 +156,116 @@ def analyze(cosineArray):
     print(str(vc12Ave) + "\n" + str(vc12SD) + "\n" + str(vc13Ave) + "\n" + str(vc13SD) + "\n" + str(vc14Ave) + "\n" + str(vc14SD) + "\n" + str(vc23Ave) + "\n" + str(vc23SD) + "\n" + str(vc24Ave) + "\n" + str(vc24SD) + "\n" + str(vc34Ave) + "\n" + str(vc34SD))
 
 
+def runFileLog(corpus, trainWordsFile, numTrainWords):
+    with open(corpus, "rt") as f:
+        fin = f.read()
+
+        entry_pat = "\*--\s(.*?)--\*" # Separates entries
+        time_pat = '\d\d\d\d\d\d\d\d\d\d' # 10 digit pattern in first line
+        comment_pat = '\n(.*)' # what comes after the first line
+
+        entries = re.findall(entry_pat, fin, re.DOTALL)
+
+        times = list()
+        comments = list()
+        commentWC = list()
+
+        numEntries = len(entries)
+        j = 0
+        for i in range(numEntries):
+            try:
+                time = re.search(time_pat, entries[i]).group()
+                comment = re.search(comment_pat, entries[i], re.DOTALL).group(1)
+            except:
+                # print('Error on filename "' + fileName + '"\nEntry #' + str(i))
+                # print("Error entry: " + entries[i])
+                continue
+            times.append(time)
+            comments.append(comment) #tokenizer.tokenize(comment)
+            commentWC.append(len(comments[j].split()))
+            j += 1
+        f.close
+    
+    rawData = pd.DataFrame({'time': times,'tokenCount': commentWC,'comment': comments})
+    sortedData = rawData.sort_values('time', ascending=(True)).reset_index()
+    # sortedData.to_csv('test.csv')
+
+    with open(trainWordsFile, "rt") as f:
+        fin = f.read()
+        train_words = fin.split()
+        f.close
+ 
+    
+    
+
+    zeros = [0]*numTrainWords # size of WF vector
+    dictionary1 = dict(zip(train_words, zeros)) 
+    dictionary2 = dict(zip(train_words, zeros)) 
+    dictionary3 = dict(zip(train_words, zeros)) 
+    dictionary4 = dict(zip(train_words, zeros)) 
+
+#added 63, modified 68-75
+
+    punc = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
+    tempData = list()
+    redditData = list()
+    tempData = (sortedData['comment'].str.cat(sep=' ').split())
+    for word in tempData:
+        if word.lower() in dictionary1:
+            redditData.append(word.lower())
+        else:
+            for letter in word:
+                        if letter in punc: 
+                            word = word.replace(letter, "") 
+            if word.lower() in dictionary1:
+                redditData.append(word.lower())
+    totalWords = len(redditData)
+
+    check = 0
+
+    for i in range(totalWords):
+        if i <= (totalWords//4):
+            dictionary1[redditData[i]] += 1
+            check += 1
+        elif i <= ((totalWords)//2):
+            dictionary2[redditData[i]] += 1
+            check += 1
+        elif i <= ((3*totalWords)//4):
+            dictionary3[redditData[i]] += 1
+            check += 1
+        else:
+            dictionary4[redditData[i]] += 1
+            check += 1
+        
+    x = pd.DataFrame({'Words': dictionary1.keys(), 'Frequency1': dictionary1.values(), 'Frequency2': dictionary2.values(), 'Frequency3': dictionary3.values(), 'Frequency4': dictionary4.values()})
+    f1 = list(dictionary1.values())
+    for i in range(len(f1)):
+        if f1[i] != 0:
+            f1[i] = math.log10(f1[i])
+    f2 = list(dictionary2.values())
+    for i in range(len(f2)):
+        if f2[i] != 0:
+            f2[i] = math.log10(f2[i])
+    f3 = list(dictionary3.values())
+    for i in range(len(f3)):
+        if f3[i] != 0:
+            f3[i] = math.log10(f3[i])
+    f4 = list(dictionary4.values())
+    for i in range(len(f4)):
+        if f4[i] != 0:
+            f4[i] = math.log10(f4[i])
+
+    vc12 = 1-spatial.distance.cosine(f1, f2)
+    vc13 = 1-spatial.distance.cosine(f1, f3)
+    vc14 = 1-spatial.distance.cosine(f1, f4)
+    vc23 = 1-spatial.distance.cosine(f2, f3)
+    vc24 = 1-spatial.distance.cosine(f2, f4)
+    vc34 = 1-spatial.distance.cosine(f3, f4)
+    cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
+    # print(cosineValues)
+    # if (vc12 < .4 or vc23 <.4 or vc34 < .4):
+    #     abnormalUsers.append(corpus)
+
 
 
 def generateTrainWordsWithoutStop(n):
@@ -272,13 +382,26 @@ def run(corporaDirectory, trainWordsFile, numTrainWords):
     print("--- %s seconds ---" % (time.time() - start_time))
     print(str(corporaDirectory) + "\t" + str(trainWordsFile) + "\t" + str(numTrainWords))
 
-# generateTrainWordsWithoutStop(150000)
+def runLog(corporaDirectory, trainWordsFile, numTrainWords):
+
+    i = 1
+    for filename in os.listdir(corporaDirectory):
+            if filename.endswith(".txt"):
+                if (i%100 == 0):
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                if (i%10 == 0):
+                    print("running file " + str(i) + ": " + filename)
+                runFileLog(('./' + str(corporaDirectory) + '/' + filename), trainWordsFile, numTrainWords)
+                i += 1
+    analyze(cosineValues)
+    print("--- %s seconds ---" % (time.time() - start_time))
+    print(str(corporaDirectory) + "\t" + str(trainWordsFile) + "\t" + str(numTrainWords))
+
+# generateTrainWordsWithoutStop(300000)
 # generateTrainWordsWithStop(150000)
 cosineValues = list()
-# abnormalUsers = list()
-run('1200_corpora', '150000_words_stops_removed.txt', 150000)
-# print(abnormalUsers)
-genHistogram("(1200 users, 150000 derived, with stops)")
+runLog('1200_corpora', '150000_words_stops_removed.txt', 150000)
+genHistogram("(1200 users, 150000 derived, no stops, log)")
              
 
     
