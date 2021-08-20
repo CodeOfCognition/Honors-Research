@@ -5,53 +5,21 @@ import pandas as pd
 from scipy import spatial
 import math
 import os
+import json
 import time
 import matplotlib.pyplot as plt
 
 start_time = time.time()
 
-def runFile(corpus, trainWordsFile, numTrainWords):
-    ###
-    with open(corpus, "rt") as f:
-        fin = f.read()
+def runFile(corpus, vectorWordsFile, numTrainWords):
+    dfData = pd.read_csv(corpus)
+    dfData.columns = ["time", "subreddit", "comment"]
+    dfData = dfData.sort_values('time', ascending=(True)).reset_index()
 
-        entry_pat = "\*--\s(.*?)--\*" # Separates entries
-        time_pat = '\d\d\d\d\d\d\d\d\d\d' # 10 digit pattern in first line
-        comment_pat = '\n(.*)' # what comes after the first line
-
-        entries = re.findall(entry_pat, fin, re.DOTALL)
-
-        times = list()
-        comments = list()
-        commentWC = list()
-
-        numEntries = len(entries)
-        j = 0
-        for i in range(numEntries):
-            try:
-                time = re.search(time_pat, entries[i]).group()
-                comment = re.search(comment_pat, entries[i], re.DOTALL).group(1)
-            except:
-                # print('Error on filename "' + fileName + '"\nEntry #' + str(i))
-                # print("Error entry: " + entries[i])
-                continue
-            times.append(time)
-            comments.append(comment) #tokenizer.tokenize(comment)
-            commentWC.append(len(comments[j].split()))
-            j += 1
-        f.close
-    
-    rawData = pd.DataFrame({'time': times,'tokenCount': commentWC,'comment': comments})
-    sortedData = rawData.sort_values('time', ascending=(True)).reset_index()
-    # sortedData.to_csv('test.csv')
-
-    with open(trainWordsFile, "rt") as f:
+    with open(vectorWordsFile, "rt") as f:
         fin = f.read()
         train_words = fin.split()
         f.close
- 
-    
-    
 
     zeros = [0]*numTrainWords # size of WF vector
     dictionary1 = dict(zip(train_words, zeros)) 
@@ -59,39 +27,24 @@ def runFile(corpus, trainWordsFile, numTrainWords):
     dictionary3 = dict(zip(train_words, zeros)) 
     dictionary4 = dict(zip(train_words, zeros)) 
 
-#added 63, modified 68-75
-
-    punc = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
-    tempData = list()
-    redditData = list()
-    tempData = (sortedData['comment'].str.cat(sep=' ').split())
-    for word in tempData:
-        if word.lower() in dictionary1:
-            redditData.append(word.lower())
-        else:
-            for letter in word:
-                        if letter in punc: 
-                            word = word.replace(letter, "") 
-            if word.lower() in dictionary1:
-                redditData.append(word.lower())
-    totalWords = len(redditData)
+    a = dfData['comment'].str
+    listedData = (dfData['comment'].str.cat(sep=' ').split())
+    totalWords = len(listedData)
 
     check = 0
-
-    ###
     
     for i in range(totalWords):
         if i <= (totalWords//4):
-            dictionary1[redditData[i]] += 1
+            dictionary1[listedData[i]] += 1
             check += 1
         elif i <= ((totalWords)//2):
-            dictionary2[redditData[i]] += 1
+            dictionary2[listedData[i]] += 1
             check += 1
         elif i <= ((3*totalWords)//4):
-            dictionary3[redditData[i]] += 1
+            dictionary3[listedData[i]] += 1
             check += 1
         else:
-            dictionary4[redditData[i]] += 1
+            dictionary4[listedData[i]] += 1
             check += 1
         
     x = pd.DataFrame({'Words': dictionary1.keys(), 'Frequency1': dictionary1.values(), 'Frequency2': dictionary2.values(), 'Frequency3': dictionary3.values(), 'Frequency4': dictionary4.values()})
@@ -271,43 +224,6 @@ def runFileLog(corpus, trainWordsFile, numTrainWords):
 
 
 
-def generateTrainWordsWithoutStop(n):
-    with open("sorted_train_words.txt", "rt") as f:
-        fin = f.read()
-        train_words1 = fin.split()
-        f.close
-    with open("stopList.txt", "rt") as f:
-        fin = f.read()
-        stopList = fin.split()
-        f.close
-    for stop in stopList:
-        if stop in train_words1:
-            train_words1.remove(stop)
-    train_words2 = []
-    for i in range(0, n):
-        train_words2.append(train_words1[i])
-    try:
-        f = open(str(i+1) + "_words_stops_removed.txt", "x")
-    except:
-        f = open(str(i+1) + "_words_stops_removed.txt", "w")
-    for word in train_words2:
-        f.write(word + '\n')
-
-def generateTrainWordsWithStop(n):
-    with open("sorted_train_words.txt", "rt") as f:
-        fin = f.read()
-        train_words1 = fin.split()
-        f.close
-    train_words2 = []
-    for i in range(0, n):
-        train_words2.append(train_words1[i])
-    try:
-        f = open(str(i+1) + "_words_stops_included.txt", "x")
-    except:
-        f = open(str(i+1) + "_words_stops_included.txt", "w")
-    for word in train_words2:
-        f.write(word + '\n')
-
 def genHistogram(titlename):
     vc12 = list()
     vc13 = list()
@@ -368,23 +284,6 @@ def genHistogram(titlename):
     
 
 
-
-
-def run(corporaDirectory, trainWordsFile, numTrainWords):
-
-    i = 1
-    for filename in os.listdir("./corpora/" + corporaDirectory):
-            if filename.endswith(".txt"):
-                if (i%100 == 0):
-                    print("--- %s seconds ---" % (time.time() - start_time))
-                if (i%1 == 0):
-                    print("running file " + str(i) + ": " + filename)
-                runFile((('./corpora/' + str(corporaDirectory) + '/' + filename)), trainWordsFile, numTrainWords)
-                i += 1
-    analyze(cosineValues)
-    print("--- %s seconds ---" % (time.time() - start_time))
-    print(str(corporaDirectory) + "\t" + str(trainWordsFile) + "\t" + str(numTrainWords))
-
 def runLog(corporaDirectory, trainWordsFile, numTrainWords):
 
     i = 1
@@ -400,11 +299,31 @@ def runLog(corporaDirectory, trainWordsFile, numTrainWords):
     print("--- %s seconds ---" % (time.time() - start_time))
     print(str(corporaDirectory) + "\t" + str(trainWordsFile) + "\t" + str(numTrainWords))
 
-# generateTrainWordsWithoutStop(300000)
-# generateTrainWordsWithStop(150000)
+
+def run(prePath, corporaDir, vectorWordsFile, numVectorWords):
+
+    i = 1
+    for filename in os.listdir(prePath + corporaDir):
+            if filename.endswith(".csv"):
+                if (i%100 == 0):
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                if (i%1 == 0):
+                    print("running file " + str(i) + ": " + filename)
+                runFile(((prePath + corporaDir + '/' + filename)), vectorWordsFile, numVectorWords)
+                i += 1
+    analyze(cosineValues)
+    print("--- %s seconds ---" % (time.time() - start_time))
+    print(corporaDir + "\t" + str(vectorWordsFile) + "\t" + str(numVectorWords))
+
+
+
 cosineValues = list()
-run('10_corpora', './helperFiles/150000_words_stops_removed.txt', 150000)
-# genHistogram("(1200 users, 150000 derived, no stops, log)")
+run('./corpora/', '10_corpora_clean', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000)
+
+
+#Notes:
+#IUWF can't process comments because they're stores like this "["the", "and", ...]" instead of like this "the and ..."
+#Need to change the preprocessing function. See line 162
              
 
     

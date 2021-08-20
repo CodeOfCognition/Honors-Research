@@ -6,6 +6,13 @@ import time
 import pandas as pd
 import numpy as np
 
+###################################################################################################
+#                               ~ Fully functional August 20, 2021. ~                             #
+# Functions:                                                                                      #
+#   - genVectorWords: generates lists of n most common words across a set of raw reddit corpora   #
+#   - cleanCorpora: transforms raw corpora into csv files with stops and punctuation removed      #
+###################################################################################################
+
 start_time = time.time()
 
 def genVectorWords(prePath, corporaDir, n, includeStopWords):
@@ -135,7 +142,12 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
                             cleanComments[i].append(word)
 
             data = zip(times, subreddits, (cleanComments))
-            f = open("corpora/" + corporaDir + "_clean_stops/" + filename + ".csv", "w")
+            filePathOG = "corpora/" + corporaDir + "_clean_stops/" + filename
+            size = len(filePathOG)
+            filePath = filePathOG[:size - 3] + "csv"
+          
+
+            f = open(filePath, "w")
             writer = csv.writer(f)
             writer.writerows(data)
 
@@ -157,7 +169,11 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
                         if word in vector_words:
                             cleanComments[i].append(word)
             data = zip(times, subreddits, (cleanComments))
-            f = open("corpora/" + corporaDir + "_clean/" + filename + ".csv", "w")
+            filePathOG = "corpora/" + corporaDir + "_clean/" + filename
+            size = len(filePathOG)
+            filePath = filePathOG[:size - 3] + "csv"
+
+            f = open(filePath, "w")
             writer = csv.writer(f)
             writer.writerows(data)
 
@@ -184,9 +200,6 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
                     print ("Running file " + str(i) + ": " + filename)
                 runFile(corporaDir, filename)
                 i += 1
-
-
-
 
 
 
