@@ -131,16 +131,17 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
                 cleanComments.append([])
             punc = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
             for i in range(len(rawComments)):
+                newWord = ""
                 for word in rawComments[i].split():
                     if word.lower() in vector_words:
-                        cleanComments[i].append(word.lower())
+                        newWord += word.lower() + " "
                     else:
                         for letter in word:
                                 if letter in punc: 
                                     word = word.replace(letter, "") 
                         if word in vector_words:
-                            cleanComments[i].append(word)
-
+                            newWord += word.lower() + " "
+                cleanComments[i] = newWord
             data = zip(times, subreddits, (cleanComments))
             filePathOG = "corpora/" + corporaDir + "_clean_stops/" + filename
             size = len(filePathOG)
@@ -157,9 +158,10 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
                 cleanComments.append([])
             punc = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
             for i in range(len(rawComments)):
+                newWord = ""
                 for word in rawComments[i].split():
                     if word.lower() in vector_words:
-                        cleanComments[i].append(word.lower())
+                        newWord += word.lower() + " "
                     else:
                         if word.lower() in stopWords:
                             continue
@@ -167,7 +169,8 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
                                 if letter in punc: 
                                     word = word.replace(letter, "") 
                         if word in vector_words:
-                            cleanComments[i].append(word)
+                            newWord += word.lower() + " "
+                cleanComments[i] = newWord
             data = zip(times, subreddits, (cleanComments))
             filePathOG = "corpora/" + corporaDir + "_clean/" + filename
             size = len(filePathOG)
@@ -210,6 +213,56 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
 # genVectorWords("/volumes/Robbie_External_Hard_Drive/", "10_corpora", 150000, False)
 
 ### Generate new, cleaned corpora ###
-cleanCorpora("/volumes/Robbie_External_Hard_Drive/", "10_corpora", "vector_words_150000_derived_10_corpora_stops.txt", True)
+cleanCorpora("/volumes/Robbie_External_Hard_Drive/", "5200_corpora", "vector_words_150000_derived_5200_corpora.txt", False)
 
 #NOTE: Still need to fix else case for stops included, add .txt
+
+
+
+
+
+
+
+
+# def myMethod():
+#     def runFile(fileName):
+#         with open(fileName, "rt") as f:
+#             data = f.readlines()
+#             times = list()
+#             subreddits = list()
+#             comments = list()
+
+#             for line in data:
+#                 lineData = line.split(',')
+#                 comment = ""
+#                 for i in range(len(lineData)):
+#                     if i > 1:
+#                         comment += lineData[i]
+#                 times.append(lineData[0])
+#                 subreddits.append(lineData[1])
+#                 comments.append(comment)
+#             punc = '''()[]{}'"\,'''
+#             newComments = list()
+#             for c in comments:
+#                 for letter in c:
+#                     if letter in punc:
+#                         c = c.replace(letter, "")
+#                 newComments.append(c)
+#         f.close
+#         with open(fileName, "w") as f:
+#             data = zip(times, subreddits, comments)
+#             writer = csv.writer(f)
+#             writer.writerows(data)
+            
+
+#     dirName = "./corpora/10_test/"
+#     i = 0
+#     for filename in os.listdir(dirName):
+#             if filename.endswith(".csv"):
+#                 if (i%1 == 0):
+#                     print("--- %s seconds ---" % (time.time() - start_time))
+#                     print ("Running file " + str(i) + ": " + filename)
+#                 runFile(dirName + filename)
+#                 i += 1
+
+# myMethod()

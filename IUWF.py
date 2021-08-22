@@ -9,6 +9,9 @@ import json
 import time
 import matplotlib.pyplot as plt
 
+# Still need to implement Log feature. Otherwise, fully functional.
+
+
 start_time = time.time()
 
 def runFile(corpus, vectorWordsFile, numTrainWords):
@@ -305,9 +308,9 @@ def run(prePath, corporaDir, vectorWordsFile, numVectorWords):
     i = 1
     for filename in os.listdir(prePath + corporaDir):
             if filename.endswith(".csv"):
-                if (i%100 == 0):
+                if (i%25 == 0):
                     print("--- %s seconds ---" % (time.time() - start_time))
-                if (i%1 == 0):
+                if (i%25 == 0):
                     print("running file " + str(i) + ": " + filename)
                 runFile(((prePath + corporaDir + '/' + filename)), vectorWordsFile, numVectorWords)
                 i += 1
@@ -318,8 +321,8 @@ def run(prePath, corporaDir, vectorWordsFile, numVectorWords):
 
 
 cosineValues = list()
-run('./corpora/', '10_corpora_clean', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000)
-
+run('./corpora/', '5200_corpora_clean', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000)
+genHistogram("5200")
 
 #Notes:
 #IUWF can't process comments because they're stores like this "["the", "and", ...]" instead of like this "the and ..."
