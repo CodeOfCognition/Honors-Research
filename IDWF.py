@@ -11,50 +11,10 @@ import matplotlib.pyplot as plt
 start_time = time.time()
 
 def runFile(corpus, trainWordsFile, numTrainWords, threshold):
-    dfData = pd.read_csv(corpus)
-    dfData.columns = ["time", "subreddit", "comment"]
-    dfData = dfData.sort_values(['subreddit', 'time'], ascending=(True, True)).reset_index()
-    
-    # with open(corpus, "rt") as f:
-    #     fin = f.read()
-
-    #     entry_pat = "\*--\s(.*?)--\*" # Separates entries
-    #     time_pat = '\d\d\d\d\d\d\d\d\d\d' # 10 digit pattern in first line
-    #     subreddit_pat = '\d\d\d\d\d\d\d\d\d\d\s(.*?)\s' # what comes after 10 digit pattern in first line
-    #     comment_pat = '\n(.*)' # what comes after the first line
-        
-    #     entries = re.findall(entry_pat, fin, re.DOTALL)
-
-    #     times = list()
-    #     subreddits = list()
-    #     comments = list()
-    #     commentWC = list()
-
-    #     numEntries = len(entries)
-    #     j = 0
-    #     for i in range(numEntries):
-    #         try:
-    #             time = re.search(time_pat, entries[i]).group()
-    #             subreddit = re.search(subreddit_pat, entries[i]).group(1)
-    #             comment = re.search(comment_pat, entries[i], re.DOTALL).group(1)
-    #         except:
-    #             continue
-    #         times.append(time)
-    #         subreddits.append(subreddit)
-    #         comments.append(comment) 
-    #         commentWC.append(len(comments[j].split()))
-    #         j += 1
-    #         # print("Comment length: " + str(commentWC[i]))
-    #     f.close
-
-    # rawData = pd.DataFrame({'subreddit': subreddits,'time': times,'tokenCount': commentWC,'comment': comments})
-    # sortedData = rawData.sort_values(['subreddit', 'time'], ascending=(True, True)).reset_index()
-    # # sortedData.to_csv('lorem.csv')
 
     dfData = pd.read_csv(corpus)
     dfData.columns = ["time", "subreddit", "comment"]
     dfData = dfData.sort_values(['subreddit', 'time'], ascending=(True, True)).reset_index()
-
 
     currentSubreddit = dfData['subreddit'][0]
     counter = 0
@@ -68,7 +28,7 @@ def runFile(corpus, trainWordsFile, numTrainWords, threshold):
             currentSubreddit = dfData['subreddit'][index]
             subredditString += dfData['comment'][index] 
         else: #new subreddit, last subreddit was above threshold
-            subredditComments.append([subredditString.split(' ')])
+            subredditComments.append(subredditString.split(' '))
             subredditTitles.add(currentSubreddit)
             currentSubreddit = dfData['subreddit'][index]
             subredditString = ""
@@ -77,7 +37,6 @@ def runFile(corpus, trainWordsFile, numTrainWords, threshold):
         subredditComments.append([temp])
         subredditTitles.add(currentSubreddit)
 
-
     with open(trainWordsFile, "rt") as f:
         fin = f.read()
         train_words = fin.split()
@@ -85,54 +44,40 @@ def runFile(corpus, trainWordsFile, numTrainWords, threshold):
 
 #### PICK UP HERE
 
-    for s in subredditData:
-        words = s # list all words used across comments of subreddit 0
+    for words in subredditComments:
         zeros = [0]*numTrainWords # array of zeros
         dictionary1 = dict(zip(train_words, zeros)) 
         dictionary2 = dict(zip(train_words, zeros)) 
         dictionary3 = dict(zip(train_words, zeros)) 
         dictionary4 = dict(zip(train_words, zeros)) 
-        count = 0
-        cleanWords = list()
-        for word in words:
-            word = word.lower()
-            if word in dictionary1:
-                cleanWords.append(word)
+        totalWords = len(words)
+        for i in range(totalWords - 1):
+            if i <= (totalWords/4):
+                dictionary1[words[i]] += 1
+                i += 1
+            elif i <= ((totalWords)/2):
+                dictionary2[words[i]] += 1
+                i += 1
+            elif i <= ((3*totalWords)/4):
+                dictionary3[words[i]] += 1
+                i += 1
             else:
-                for letter in word:
-                        if letter in punc: 
-                            word = word.replace(letter, "") 
-                if word in dictionary1:
-                    cleanWords.append(word)
-        totalWords = len(cleanWords)
-        if totalWords >= threshold:
-            for word in cleanWords:
-                if count <= (totalWords/4):
-                    dictionary1[word] += 1
-                    count += 1
-                elif count <= ((totalWords)/2):
-                    dictionary2[word] += 1
-                    count += 1
-                elif count <= ((3*totalWords)/4):
-                    dictionary3[word] += 1
-                    count += 1
-                else:
-                    dictionary4[word] += 1
-                    count += 1
+                dictionary4[words[i]] += 1
+                i += 1
 
-            # x = pd.DataFrame({'Words': dictionary1.keys(), 'Frequency1': dictionary1.values(), 'Frequency2': dictionary2.values(), 'Frequency3': dictionary3.values(), 'Frequency4': dictionary4.values()})
-            f1 = list(dictionary1.values())
-            f2 = list(dictionary2.values())
-            f3 = list(dictionary3.values())
-            f4 = list(dictionary4.values())
 
-            vc12 = 1-spatial.distance.cosine(f1, f2)
-            vc13 = 1-spatial.distance.cosine(f1, f3)
-            vc14 = 1-spatial.distance.cosine(f1, f4)
-            vc23 = 1-spatial.distance.cosine(f2, f3)
-            vc24 = 1-spatial.distance.cosine(f2, f4)
-            vc34 = 1-spatial.distance.cosine(f3, f4)
-            cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
+        f1 = list(dictionary1.values())
+        f2 = list(dictionary2.values())
+        f3 = list(dictionary3.values())
+        f4 = list(dictionary4.values())
+
+        vc12 = 1-spatial.distance.cosine(f1, f2)
+        vc13 = 1-spatial.distance.cosine(f1, f3)
+        vc14 = 1-spatial.distance.cosine(f1, f4)
+        vc23 = 1-spatial.distance.cosine(f2, f3)
+        vc24 = 1-spatial.distance.cosine(f2, f4)
+        vc34 = 1-spatial.distance.cosine(f3, f4)
+        cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
 
 def analyze(cosineArray):
     vc12Ave = 0
@@ -270,6 +215,8 @@ dwfSubreddits = list()
 
 
 
-run("./corpora/10_corpora_clean", "./helperFiles/vector_words_150000_derived_5200_corpora.txt", 150000, 100000) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
+run("./corpora/50_corpora_clean", "./helperFiles/vector_words_150000_derived_5200_corpora.txt", 150000, 100000) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
 
 # genHistogram("(DWF: " + str(nUsers) + "users, 300000 derived, no stops, " + str(threshold) + "minimum)")
+
+#error: nan pops up right before words sometimes.
