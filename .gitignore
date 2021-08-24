@@ -7,3 +7,5 @@ node_modules
 # Ignore corpora
 corpora
 
+helperFiles/GDWF_discourses_*
+

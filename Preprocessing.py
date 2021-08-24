@@ -230,7 +230,7 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
 # genVectorWords("/volumes/Robbie_External_Hard_Drive/", "10_corpora", 150000, False)
 
 ### Generate new, cleaned corpora ###
-cleanCorpora("/volumes/Robbie_External_Hard_Drive/", "5200_corpora", "vector_words_150000_derived_5200_corpora.txt", False)
+cleanCorpora("./corpora/", "50_corpora", "vector_words_150000_derived_5200_corpora.txt", False)
 
 #NOTE: Still need to fix else case for stops included, add .txt
 
