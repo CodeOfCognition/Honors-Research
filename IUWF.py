@@ -16,7 +16,7 @@ start_time = time.time()
 
 def runFile(corpus, vectorWordsFile, numTrainWords, takeLog):
     dfData = pd.read_csv(corpus)
-    dfData.columns = ["time", "subreddit", "comment"]
+    dfData.columns = ["time", "wordcount", "subreddit", "comment"]
     dfData = dfData.sort_values('time', ascending=(True)).reset_index()
 
     with open(vectorWordsFile, "rt") as f:
@@ -230,9 +230,6 @@ cosineValues = list()
 run('./corpora/', '50_corpora_clean', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, False)
 genHistogram("50")
 
-#Notes:
-#IUWF can't process comments because they're stores like this "["the", "and", ...]" instead of like this "the and ..."
-#Need to change the preprocessing function. See line 162
              
 
     

@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 
 start_time = time.time()
 
+##NOthing done - just a GDWF copy
+
 def runFile(corpus, trainWordsFile, numTrainWords, threshold):
 
     dfData = pd.read_csv(corpus)

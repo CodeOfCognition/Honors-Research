@@ -117,19 +117,21 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
                 subreddits.append(subreddit)
                 rawComments.append(rawComment) #tokenizer.tokenize(comment)
                 j += 1
-                # print("Comment length: " + str(commentWC[i]))
         f.close
 
         with open("./helperFiles/stopList.txt", "rt") as f:
             fin = f.read()
             stopWords = set(fin.split())
         f.close 
-     
+
+        toDelete = list()
+        cleanComments = list()
+        punc = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
+        wcs= list()
+
         if includeStopWords:
-            cleanComments = list()
             for i in range(len(rawComments)):
                 cleanComments.append([])
-            punc = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
             for i in range(len(rawComments)):
                 newWord = ""
                 for word in rawComments[i].split():
@@ -142,6 +144,11 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
                         if word in vector_words:
                             newWord += word.lower() + " "
                 cleanComments[i] = newWord
+            for i in range(len(cleanComments)-1, 0, -1):
+                if "" == cleanComments[i]:
+                    del times[i]
+                    del subreddits[i]
+                    del cleanComments[i]
             data = zip(times, subreddits, (cleanComments))
             filePathOG = "corpora/" + corporaDir + "_clean_stops/" + filename
             size = len(filePathOG)
@@ -153,15 +160,15 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
             writer.writerows(data)
 
         else:
-            cleanComments = list()
             for i in range(len(rawComments)):
                 cleanComments.append([])
-            punc = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
             for i in range(len(rawComments)):
                 newWord = ""
+                wc = 0
                 for word in rawComments[i].split():
                     if word.lower() in vector_words:
                         newWord += word.lower() + " "
+                        wc += 1
                     else:
                         if word.lower() in stopWords:
                             continue
@@ -170,8 +177,18 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
                                     word = word.replace(letter, "") 
                         if word in vector_words:
                             newWord += word.lower() + " "
+                            wc +=1
                 cleanComments[i] = newWord
-            data = zip(times, subreddits, (cleanComments))
+                wcs.append(wc)
+            if len(wcs) != len(cleanComments):
+                print("Something went wrong: line 184")
+            for i in range(len(cleanComments)-1, 0, -1):
+                if "" == cleanComments[i]:
+                    del times[i]
+                    del subreddits[i]
+                    del cleanComments[i]
+                    wcs.pop(i)
+            data = zip(times, subreddits, wcs, cleanComments)
             filePathOG = "corpora/" + corporaDir + "_clean/" + filename
             size = len(filePathOG)
             filePath = filePathOG[:size - 3] + "csv"
@@ -213,7 +230,7 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
 # genVectorWords("/volumes/Robbie_External_Hard_Drive/", "10_corpora", 150000, False)
 
 ### Generate new, cleaned corpora ###
-cleanCorpora("./corpora/", "10_corpora", "vector_words_150000_derived_10_corpora.txt", False)
+cleanCorpora("/volumes/Robbie_External_Hard_Drive/", "5200_corpora", "vector_words_150000_derived_5200_corpora.txt", False)
 
 #NOTE: Still need to fix else case for stops included, add .txt
 
