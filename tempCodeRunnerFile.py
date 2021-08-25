@@ -1,1 +1,2 @@
-print(min("abcd", "abc"))
+if 0 == "re":
+        print()

@@ -1,26 +1,20 @@
-import os
 import re
 import numpy as np
 import pandas as pd
+import nltk
 from scipy import spatial
-import math
 import os
-import json
+import math
 import time
 import matplotlib.pyplot as plt
 
-# Still need to implement Log feature. Otherwise, fully functional.
-
-
 start_time = time.time()
 
-def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
-    dfData = pd.read_csv(corpus, header=None)
-    dfData.columns = ["time", "wordcount", "subreddit", "comment"]
-    if not runControl:
-        dfData = dfData.sort_values('time', ascending=(True)).reset_index()
-    else:
-        dfData = dfData.sample(frac=1)
+
+def runFile(corpus, vectorWordsFile, numTrainWords, takeLog):
+    dfData = pd.read_csv(corpus)
+    dfData.columns = ["times", "comments"]
+    dfData = dfData.sort_values('times', ascending=(True)).reset_index()
 
     with open(vectorWordsFile, "rt") as f:
         fin = f.read()
@@ -33,7 +27,6 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
     dictionary3 = dict(zip(train_words, zeros)) 
     dictionary4 = dict(zip(train_words, zeros)) 
 
-    a = dfData['comment'].str
     listedData = (dfData['comment'].str.cat(sep=' ').split())
     totalWords = len(listedData)
 
@@ -212,16 +205,16 @@ def genHistogram(titlename):
     
 
 
-def run(prePath, corporaDir, vectorWordsFile, numVectorWords, takeLog, runControl):
+def run(corporaDir, vectorWordsFile, numVectorWords, takeLog):
 
     i = 1
-    for filename in os.listdir(prePath + corporaDir):
+    for filename in os.listdir(corporaDir):
             if filename.endswith(".csv"):
                 if (i%25 == 0):
                     print("--- %s seconds ---" % (time.time() - start_time))
                 if (i%25 == 0):
                     print("running file " + str(i) + ": " + filename)
-                runFile(((prePath + corporaDir + '/' + filename)), vectorWordsFile, numVectorWords, takeLog, runControl)
+                runFile(((corporaDir + '/' + filename)), vectorWordsFile, numVectorWords, takeLog)
                 i += 1
     analyze(cosineValues)
     print("--- %s seconds ---" % (time.time() - start_time))
@@ -230,9 +223,7 @@ def run(prePath, corporaDir, vectorWordsFile, numVectorWords, takeLog, runContro
 
 
 cosineValues = list()
-run('./corpora/', '5200_corpora_clean', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, False, True)
+run('./helperFiles/GDWF_discourses_5200', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, True)
 genHistogram("5200, no stops, log")
 
              
-
-    

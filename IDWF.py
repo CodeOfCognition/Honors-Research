@@ -12,7 +12,7 @@ start_time = time.time()
 
 def runFile(corpus, trainWordsFile, numTrainWords, threshold):
 
-    dfData = pd.read_csv(corpus)
+    dfData = pd.read_csv(corpus, header=None)
     dfData.columns = ["time", "subreddit", "wordcount", "comment"]
     dfData = dfData.sort_values(['subreddit', 'time'], ascending=(True, True)).reset_index()
 
@@ -24,25 +24,23 @@ def runFile(corpus, trainWordsFile, numTrainWords, threshold):
     j=0
     wc = 0
     validRanges = list() #includes lists of ranges with word counts of 100000+
-    i = 0
     for index, row in dfData.iterrows():
         if (currentSubreddit == dfData['subreddit'][index]): #same subreddit
             wc += int(dfData['wordcount'][index])
         elif (wc < threshold): #new subreddit, last subreddit was below threshold
             currentSubreddit = dfData['subreddit'][index]
             rangeStart=index
-            wc = 0
-            wc += int(dfData['wordcount'][index])
+            wc = int(dfData['wordcount'][index])
         else: #new subreddit, last subreddit was above threshold
             currentSubreddit = dfData['subreddit'][index]
             validRanges.append([rangeStart, index-1])
-            i=index
+            rangeStart=index
             wc = int(dfData['wordcount'][index])
     if wc>threshold: #handles last comment
-        validRanges.append([i,len(dfData["wordcount"])-1])
+        validRanges.append([rangeStart,len(dfData["wordcount"])-1]) # CHECK this line
     for rangeSet in validRanges:
         if not dfData['subreddit'][rangeSet[0]] == dfData['subreddit'][rangeSet[1]]:
-            print("Error: range thingy doesn't work. line 43.")
+            print("Error: valid ranges are incorrect. See line 43.")
         for i in range(rangeSet[0],rangeSet[1]):
             subredditString += str(dfData['comment'][i])
         subredditComments.append(subredditString.split(' '))
@@ -227,7 +225,7 @@ dwfSubreddits = list()
 
 
 
-run("./corpora/10_corpora_clean", "./helperFiles/vector_words_150000_derived_10_corpora.txt", 150000, 100000) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
+run("./corpora/50_corpora_clean", "./helperFiles/vector_words_150000_derived_5200_corpora.txt", 150000, 100000) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
 with open("./helperFiles/IDWF_10_corpora_discourses.txt", "wt") as f:
     for title in subredditTitles:
         f.write(title + "\n")
