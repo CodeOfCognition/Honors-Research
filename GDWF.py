@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 start_time = time.time()
 
-##NOthing done - just a GDWF copy
+
 
 def runFile(globalDiscs, fileName, corporaPath, discCSVsPath):
     with open(fileName, "rt") as runningFile:
