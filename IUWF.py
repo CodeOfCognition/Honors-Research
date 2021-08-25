@@ -227,8 +227,8 @@ def run(prePath, corporaDir, vectorWordsFile, numVectorWords, takeLog):
 
 
 cosineValues = list()
-run('./corpora/', '50_corpora_clean', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, False)
-genHistogram("50")
+run('./corpora/', '5200_corpora_clean', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, True)
+genHistogram("5200, no stops, log")
 
              
 

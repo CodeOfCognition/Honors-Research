@@ -227,11 +227,11 @@ dwfSubreddits = list()
 
 
 
-run("./corpora/5200_corpora_clean", "./helperFiles/vector_words_150000_derived_5200_corpora.txt", 150000, 100000) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
-with open("./helperFiles/IDWF_5200_corpora_discourses.txt", "wt") as f:
+run("./corpora/10_corpora_clean", "./helperFiles/vector_words_150000_derived_10_corpora.txt", 150000, 100000) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
+with open("./helperFiles/IDWF_10_corpora_discourses.txt", "wt") as f:
     for title in subredditTitles:
         f.write(title + "\n")
 f.close()
-genHistogram("(DWF: 5200 users, 150000 derived, no stops, 100000 minimum)")
+# genHistogram("(DWF: 5200 users, 150000 derived, no stops, 100000 minimum)")
 
 #People who have >98% similarity should be flagged and investigated
