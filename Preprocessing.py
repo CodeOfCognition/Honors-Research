@@ -43,8 +43,6 @@ def genVectorWords(prePath, corporaDir, n, includeStopWords):
                         vector_words[word.lower()] += 1
 
                 except:
-                    print('Error on filename "' + fileName + '"\nEntry #' + str(i))
-                    print("Error entry: " + entries[i])
                     continue
                 j += 1
         f.close
@@ -226,11 +224,11 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
 
 
 ### Generate file containing list of vector words ###
-# genVectorWords("/volumes/Robbie_External_Hard_Drive/", "10_corpora", 150000, True)
+genVectorWords("/volumes/Robbie_External_Hard_Drive/", "5200_corpora", 150000, True)
 # genVectorWords("/volumes/Robbie_External_Hard_Drive/", "10_corpora", 150000, False)
 
 ### Generate new, cleaned corpora ###
-cleanCorpora("./corpora/", "50_corpora", "vector_words_150000_derived_5200_corpora.txt", False)
+# cleanCorpora("./corpora/", "5200_corpora", "vector_words_150000_derived_5200_corpora.txt", True)
 
 #NOTE: Still need to fix else case for stops included, add .txt
 

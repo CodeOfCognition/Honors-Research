@@ -40,7 +40,7 @@ def runFile(corpus, trainWordsFile, numTrainWords, threshold):
         validRanges.append([rangeStart,len(dfData["wordcount"])-1]) # CHECK this line
     for rangeSet in validRanges:
         if not dfData['subreddit'][rangeSet[0]] == dfData['subreddit'][rangeSet[1]]:
-            print("Error: valid ranges are incorrect. See line 43.")
+            raise Exception("Error: valid ranges are incorrect. See line 43.")
         for i in range(rangeSet[0],rangeSet[1]):
             subredditString += str(dfData['comment'][i])
         subredditComments.append(subredditString.split(' '))
@@ -164,37 +164,37 @@ def genHistogram(titlename):
     hist1 = similarityDF.hist(bins=bins100, column='vc12', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.14)
+    plt.ylim(0,.16)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 1 to 2 \n" + titlename)
     hist2 = similarityDF.hist(bins=bins100, column='vc13', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.14)
+    plt.ylim(0,.16)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 1 to 3 \n" + titlename)
     hist3 = similarityDF.hist(bins=bins100, column='vc14', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.14)
+    plt.ylim(0,.16)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 1 to 4 \n" + titlename)
     hist4 = similarityDF.hist(bins=bins100, column='vc23', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.14)
+    plt.ylim(0,.16)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 2 to 3 \n" + titlename)
     hist5 = similarityDF.hist(bins=bins100, column='vc24', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.14)
+    plt.ylim(0,.16)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 2 to 4 \n" + titlename)
     hist6 = similarityDF.hist(bins=bins100, column='vc34', weights=np.ones(length) / length)
     plt.xlabel("Similarity")
     plt.ylabel("Proportion")
-    plt.ylim(0,.14)
+    plt.ylim(0,.16)
     plt.xlim(.5,1)
     plt.title("Cosine similarity times 3 to 4 \n" + titlename)
     plt.show()
@@ -225,8 +225,8 @@ dwfSubreddits = list()
 
 
 
-run("./corpora/50_corpora_clean", "./helperFiles/vector_words_150000_derived_5200_corpora.txt", 150000, 100000) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
-with open("./helperFiles/IDWF_10_corpora_discourses.txt", "wt") as f:
+run("./corpora/5200_corpora_clean", "./helperFiles/vector_words_150000_derived_5200_corpora.txt", 150000, 100000) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
+with open("./helperFiles/IDWF_5200_corpora_discourses.txt", "wt") as f:
     for title in subredditTitles:
         f.write(title + "\n")
 f.close()
