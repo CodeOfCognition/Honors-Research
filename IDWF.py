@@ -230,6 +230,6 @@ with open("./helperFiles/IDWF_5200_corpora_discourses.txt", "wt") as f:
     for title in subredditTitles:
         f.write(title + "\n")
 f.close()
-# genHistogram("(DWF: 5200 users, 150000 derived, no stops, 100000 minimum)")
+genHistogram("(DWF: 5200 users, 150000 derived, no stops, 100000 minimum)")
 
 #People who have >98% similarity should be flagged and investigated

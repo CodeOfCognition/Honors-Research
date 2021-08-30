@@ -3,8 +3,11 @@ import re
 import csv
 from nltk.probability import FreqDist
 import time
+import math
+from scipy import spatial
 import pandas as pd
 import numpy as np
+import random
 
 ###################################################################################################
 #                               ~ Fully functional August 20, 2021. ~                             #
@@ -219,65 +222,148 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
                 runFile(corporaDir, filename)
                 i += 1
 
+def runGDWFCorporaGenerator(discCSVsPath, corporaPath):
+
+    def runFile(globalDiscs, fileList, corporaPath, discCSVsPath):
+        
+        with open(fileList[0], "rt") as f:
+            dfData = pd.read_csv(f, header=None)
+            dfData.columns = ["times", "subreddits", "wordcounts", "comments"]
+        # for i in range(len(fileList)):
+        #     if not i == 0:
+        #         with open(fileList[i], "rt") as f:
+        #             dfTemp = pd.read_csv(f, header=None)
+        #             dfTemp.columns = ["times", "subreddits", "wordcounts", "comments"]
+        #             dfData = dfData.append(dfTemp, ignore_index=True, verify_integrity=True)
+
+        
+        dfData = dfData.sort_values(['subreddits'], ascending=(True)).reset_index()
+
+        i = 0
+        maxIndex = len(globalDiscs) - 1
+        
+        currentDisc = globalDiscs[i]
+        currentOpen = globalDiscs[i]
+        
+        f = open(discCSVsPath + "/" + globalDiscs[i] + ".csv", "a")
+        for index, row in dfData.iterrows():
+            s = dfData['subreddits'][index]
+            if min(str(dfData['subreddits'][index]), currentDisc) == currentDisc: # if current disc is min of each
+                if dfData['subreddits'][index] == currentDisc: # if it is also the current (both are the same)...
+                    if currentOpen == currentDisc: # if it's open
+                        f.write(str(dfData['times'][index])+","+dfData['comments'][index]+"\n") # process line
+                    else: # if it's not open, but we want to process line on currentDisc
+                        f.close()
+                        f = open(discCSVsPath + "/" + globalDiscs[i] + ".csv", "a")
+                        currentOpen = globalDiscs[i]
+                        f.write(str(dfData['times'][index])+","+dfData['comments'][index]+"\n") # process line
+                
+                ### REPEAT STARTS HERE ### Really needs to just redo the code that just happened...
+
+                else: # else we're onto a new subreddit
+                    #increase i, check conditions again in case processing is necessary
+                    if i+1 <= maxIndex:
+                        i += 1
+                        currentDisc = globalDiscs[i]
+                    else:
+                        break
+                    while(min(currentDisc, str(dfData['subreddits'][index])) == currentDisc): # while currentDisc is min of both, iterate i...
+                        if dfData['subreddits'][index] != currentDisc: #...if both are also different 
+                            if i+1 <= maxIndex:
+                                i += 1
+                                currentDisc = globalDiscs[i]
+                            else:
+                                break
+                        else: # Else process this line
+                            f.close()
+                            f = open(discCSVsPath + "/" + globalDiscs[i] + ".csv", "a")
+                            currentOpen = globalDiscs[i]
+                            f.write(str(dfData['times'][index])+","+dfData['comments'][index]+"\n") # process line
+                            break
+                    if i > maxIndex:
+                        break
+        
 
 
 
+    with open("./helperFiles/IDWF_5200_corpora_discourses.txt", "r") as f:
+        fin = f.read()
+        globalDiscs = fin.split()
+        globalDiscs = sorted(globalDiscs)
+        f.close()
+    for disc in globalDiscs:
+        if not os.path.isfile(discCSVsPath + disc + ".csv"):
+            with open(discCSVsPath + disc + ".csv", "wt") as f:
+                f.close()
+    i=1
+    fileList = list()
+    for filename in os.listdir(corporaPath):
+        if filename.endswith(".csv"):
+            if (i%10 == 0):
+                print("--- %s seconds ---" % (time.time() - start_time))
+            if (i%100 == 0):
+                print("running file " + str(i) + ": " + filename)
+            fileList.append(corporaPath + "/" + filename)
+            if i > 3910:
+                runFile(globalDiscs, fileList, corporaPath, discCSVsPath)
+                fileList = list()
+            i += 1
+
+def runGDWFCorporaCleaner(dirPath):
+    def runFile(dirPath, fileName):
+        with open(dirPath + "/" + fileName, "rt") as f:
+            dfData = pd.read_csv(f, header=None)
+            dfData.columns = ["times", "comments"]
+        f.close()
+
+        l = len(dfData['comments'])
+        indices = np.arange(0, l-1).tolist()
+        wordCount = 0
+        value = -1
+        while wordCount < 100000:
+            value = random.choice(indices)
+            indices.remove(value)
+            wordCount += len(dfData['comments'][value].split(' '))
+            if "" in dfData['comments'][value].split(' '): wordCount += -1
+        #corrects last entry that may have gone over 100000
+        if wordCount > 100000:
+            print("Wordcount: " + str(wordCount))
+            print("OG comment (" + str(len(dfData['comments'][value].split(' '))-1) + "): " + str(dfData['comments'][value]))
+            commentList = dfData['comments'][value].split(' ')
+            numToAdd = 100000 - (wordCount - (len(commentList) -1))
+            print("numToAdd: " + str(numToAdd))
+            newComment = ' '.join(commentList[0:numToAdd]) + " "
+            print("New comment (" + str(len(newComment)) + "): " + str(newComment))
+            print("Current df value: " + str(dfData['comments'][value]))
+            dfData.at[value, 'comments'] = newComment
+            print("Current df value: " + str(dfData['comments'][value]))
+        newDF = dfData.drop(indices, axis=0)
+        l2 = len(dfData["comments"])
+        l3 = len(newDF["comments"])
+        newDF.to_csv("./corpora/GDWF_5200_clean/" + fileName, index=False)
+        
+        # with open("./corpora/GDWF_5200_clean/" + fileName, "wt") as f:
+
+
+    i=1
+    for filename in os.listdir(dirPath):
+        if filename.endswith(".csv"):
+            if (i%1 == 0):
+                print("--- %s seconds ---" % (time.time() - start_time))
+            if (i%1 == 0):
+                print("running file " + str(i) + ": " + filename)
+            runFile(dirPath, filename)
+            i += 1
+
+
+runGDWFCorporaCleaner("./helperFiles/GDWF_discourses_5200")
 
 ### Generate file containing list of vector words ###
-genVectorWords("/volumes/Robbie_External_Hard_Drive/", "5200_corpora", 150000, True)
-# genVectorWords("/volumes/Robbie_External_Hard_Drive/", "10_corpora", 150000, False)
+# genVectorWords("/volumes/Robbie_External_Hard_Drive/", "1200_corpora", 150000, True)
+# genVectorWords("/volumes/Robbie_External_Hard_Drive/", "1200_corpora", 150000, False)
 
 ### Generate new, cleaned corpora ###
-# cleanCorpora("./corpora/", "5200_corpora", "vector_words_150000_derived_5200_corpora.txt", True)
+# cleanCorpora("/volumes/Robbie_External_Hard_Drive/", "1200_corpora", "vector_words_150000_derived_5200_corpora_stops.txt", True)
 
-#NOTE: Still need to fix else case for stops included, add .txt
-
-
-
-
-
-
-
-
-# def myMethod():
-#     def runFile(fileName):
-#         with open(fileName, "rt") as f:
-#             data = f.readlines()
-#             times = list()
-#             subreddits = list()
-#             comments = list()
-
-#             for line in data:
-#                 lineData = line.split(',')
-#                 comment = ""
-#                 for i in range(len(lineData)):
-#                     if i > 1:
-#                         comment += lineData[i]
-#                 times.append(lineData[0])
-#                 subreddits.append(lineData[1])
-#                 comments.append(comment)
-#             punc = '''()[]{}'"\,'''
-#             newComments = list()
-#             for c in comments:
-#                 for letter in c:
-#                     if letter in punc:
-#                         c = c.replace(letter, "")
-#                 newComments.append(c)
-#         f.close
-#         with open(fileName, "w") as f:
-#             data = zip(times, subreddits, comments)
-#             writer = csv.writer(f)
-#             writer.writerows(data)
-            
-
-#     dirName = "./corpora/10_test/"
-#     i = 0
-#     for filename in os.listdir(dirName):
-#             if filename.endswith(".csv"):
-#                 if (i%1 == 0):
-#                     print("--- %s seconds ---" % (time.time() - start_time))
-#                     print ("Running file " + str(i) + ": " + filename)
-#                 runFile(dirName + filename)
-#                 i += 1
-
-# myMethod()
+### Generate discourse corpora from IDWF corpora discourses
+# runGDWFCorporaGenerator("./helperFiles/GDWF_discourses_5200/", "./corpora/5200_corpora_clean")

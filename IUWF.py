@@ -16,7 +16,7 @@ start_time = time.time()
 
 def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
     dfData = pd.read_csv(corpus, header=None)
-    dfData.columns = ["time", "wordcount", "subreddit", "comment"]
+    dfData.columns = ["time", "subreddit", "comment"]
     if not runControl:
         dfData = dfData.sort_values('time', ascending=(True)).reset_index()
     else:
@@ -230,8 +230,8 @@ def run(prePath, corporaDir, vectorWordsFile, numVectorWords, takeLog, runContro
 
 
 cosineValues = list()
-run('./corpora/', '5200_corpora_clean', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, False, True)
-genHistogram("5200, no stops, log")
+run('./corpora/', '1200_corpora_clean_stops', './helperFiles/vector_words_150000_derived_5200_corpora_stops.txt', 150000, True, False)
+genHistogram("1200, stops, log")
 
              
 

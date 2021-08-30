@@ -1,2 +1,2 @@
-if 0 == "re":
-        print()
+
+        wordCount = 0
