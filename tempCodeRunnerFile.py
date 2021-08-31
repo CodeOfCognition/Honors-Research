@@ -1,2 +1,1 @@
-
-        wordCount = 0
+ 

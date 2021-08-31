@@ -10,19 +10,23 @@ import matplotlib.pyplot as plt
 
 start_time = time.time()
 
-def runFile(corpus, trainWordsFile, numTrainWords, threshold):
+def runFile(corpusDir, corpus, trainWordsFile, numTrainWords, threshold):
 
-    dfData = pd.read_csv(corpus, header=None)
+    dfData = pd.read_csv(corpusDir + corpus, header=None)
     dfData.columns = ["time", "subreddit", "wordcount", "comment"]
     dfData = dfData.sort_values(['subreddit', 'time'], ascending=(True, True)).reset_index()
 
-    currentSubreddit = dfData['subreddit'][0]
-    counter = 0
     subredditComments = list()
-    subredditString = ""
+    wcs = list()
+    
+    counter = 0
     rangeStart=0
     j=0
     wc = 0
+    
+    currentSubreddit = dfData['subreddit'][0]
+    subredditString = ""
+
     validRanges = list() #includes lists of ranges with word counts of 100000+
     for index, row in dfData.iterrows():
         if (currentSubreddit == dfData['subreddit'][index]): #same subreddit
@@ -35,18 +39,29 @@ def runFile(corpus, trainWordsFile, numTrainWords, threshold):
             currentSubreddit = dfData['subreddit'][index]
             validRanges.append([rangeStart, index-1])
             rangeStart=index
+            wcs.append(wc)
             wc = int(dfData['wordcount'][index])
     if wc>threshold: #handles last comment
+        wcs.append(wc)
         validRanges.append([rangeStart,len(dfData["wordcount"])-1]) # CHECK this line
-    for rangeSet in validRanges:
-        if not dfData['subreddit'][rangeSet[0]] == dfData['subreddit'][rangeSet[1]]:
+    for i in range(0, len(validRanges)):
+        if not dfData['subreddit'][validRanges[i][0]] == dfData['subreddit'][validRanges[i][1]]:
             raise Exception("Error: valid ranges are incorrect. See line 43.")
-        for i in range(rangeSet[0],rangeSet[1]):
-            subredditString += str(dfData['comment'][i])
+        #write string of comments (already organized by time) into a new file, select min and max time, write to a file
+        for j in range(validRanges[i][0],validRanges[i][1]):
+            subredditString += str(dfData['comment'][j])
+        
+        with open("./corpora/ID-W-WF_5200/" + dfData['subreddit'][validRanges[i][0]] + "_" + corpus[0:len(corpus)-4] + ".txt", "wt") as f:
+            #writes "userName,subreddit,minTime,maxTime,wordCount"
+            f.write(corpus[0:len(corpus)-4] + "," + dfData['subreddit'][validRanges[i][0]] + ",")
+            f.write(str(dfData['time'][validRanges[i][0]]) + "," + str(dfData['time'][validRanges[i][1]]) + "," + str(wcs[i]) + "\n")
+            #writes subreddit contents
+            f.write(subredditString)
+        f.close()
+
         subredditComments.append(subredditString.split(' '))
         subredditString = ""
-        subredditTitles.add(dfData['subreddit'][rangeSet[0]])
-
+        
 
     with open(trainWordsFile, "rt") as f:
         fin = f.read()
@@ -210,7 +225,7 @@ def run(corporaDirectory, trainWordsFile, numTrainWords, threshold):
                     print("--- %s seconds ---" % (time.time() - start_time))
                 if (i%10 == 0):
                     print("running file " + str(i) + ": " + filename)
-                runFile((corporaDirectory + '/' + filename), trainWordsFile, numTrainWords, threshold)
+                runFile((corporaDirectory + '/'), filename, trainWordsFile, numTrainWords, threshold)
                 i += 1
     analyze(cosineValues)
     print("--- %s seconds ---" % (time.time() - start_time))
@@ -218,7 +233,7 @@ def run(corporaDirectory, trainWordsFile, numTrainWords, threshold):
     
 
 
-subredditTitles = set()
+
 cosineValues = list() # [[1 to 2, 1 to 3, 1 to 4], [], [] ...]
 dwfSubreddits = list()
 
@@ -226,10 +241,6 @@ dwfSubreddits = list()
 
 
 run("./corpora/5200_corpora_clean", "./helperFiles/vector_words_150000_derived_5200_corpora.txt", 150000, 100000) #folder of corpora, vector words file, vector length, minimum threshold per subreddit
-with open("./helperFiles/IDWF_5200_corpora_discourses.txt", "wt") as f:
-    for title in subredditTitles:
-        f.write(title + "\n")
-f.close()
 genHistogram("(DWF: 5200 users, 150000 derived, no stops, 100000 minimum)")
 
 #People who have >98% similarity should be flagged and investigated

@@ -316,8 +316,11 @@ def runGDWFCorporaCleaner(dirPath):
             dfData.columns = ["times", "comments"]
         f.close()
 
+
+        # dfData = pd.DataFrame({'times': [1,2,3], 'comments': ["one here", "double time", "triple nipple"]})
+
         l = len(dfData['comments'])
-        indices = np.arange(0, l-1).tolist()
+        indices = np.arange(0, l).tolist()
         wordCount = 0
         value = -1
         while wordCount < 100000:
@@ -327,19 +330,11 @@ def runGDWFCorporaCleaner(dirPath):
             if "" in dfData['comments'][value].split(' '): wordCount += -1
         #corrects last entry that may have gone over 100000
         if wordCount > 100000:
-            print("Wordcount: " + str(wordCount))
-            print("OG comment (" + str(len(dfData['comments'][value].split(' '))-1) + "): " + str(dfData['comments'][value]))
             commentList = dfData['comments'][value].split(' ')
             numToAdd = 100000 - (wordCount - (len(commentList) -1))
-            print("numToAdd: " + str(numToAdd))
             newComment = ' '.join(commentList[0:numToAdd]) + " "
-            print("New comment (" + str(len(newComment)) + "): " + str(newComment))
-            print("Current df value: " + str(dfData['comments'][value]))
             dfData.at[value, 'comments'] = newComment
-            print("Current df value: " + str(dfData['comments'][value]))
         newDF = dfData.drop(indices, axis=0)
-        l2 = len(dfData["comments"])
-        l3 = len(newDF["comments"])
         newDF.to_csv("./corpora/GDWF_5200_clean/" + fileName, index=False)
         
         # with open("./corpora/GDWF_5200_clean/" + fileName, "wt") as f:
