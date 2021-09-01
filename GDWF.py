@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 
 start_time = time.time()
 
+# Simple processing capabilities reading from GWDF csv files 
+
 
 def runFile(corpus, vectorWordsFile, numTrainWords, takeLog):
     dfData = pd.read_csv(corpus)
@@ -225,5 +227,3 @@ def run(corporaDir, vectorWordsFile, numVectorWords, takeLog):
 cosineValues = list()
 run('./helperFiles/GDWF_discourses_5200', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, False)
 genHistogram("GDWF 5200")
-
-             

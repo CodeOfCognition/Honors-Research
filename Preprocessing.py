@@ -10,11 +10,19 @@ import numpy as np
 import random
 
 ###################################################################################################
-#                               ~ Fully functional August 20, 2021. ~                             #
+#                                        ~ In progress ~                                          #
 # Functions:                                                                                      #
 #   - genVectorWords: generates lists of n most common words across a set of raw reddit corpora   #
 #   - cleanCorpora: transforms raw corpora into csv files with stops and punctuation removed      #
+#   - runGDWFCorporaGenerator: Uses IDWF_5200_corpora_discourses.txt (list of discourses used in  #
+#       IDWF analysis) to build GDWF_discourses_5200 which contains all language produced across  #
+#       5200 users in the aforementioned discourses. Note: IDWF_5200_corpora_discourses.txt is no #
+#       longer used in IDWF analysis, but it contains the correct info for 5200 users.            #
+#   - runGDWFCorporaCleaner: Creates a corpus on equal length and time of ID-W-WF_5200 corpora, but containing randomly sampled info from all users from that time period at that time
 ###################################################################################################
+
+#Possible problem: Some GDWF corpora contain only 1 person's language data
+
 
 start_time = time.time()
 
@@ -224,9 +232,9 @@ def cleanCorpora(prePath, corporaDir, vectorWordsFile, includeStopWords):
 
 def runGDWFCorporaGenerator(discCSVsPath, corporaPath):
 
-    def runFile(globalDiscs, fileList, corporaPath, discCSVsPath):
+    def runFile(globalDiscs, fileName, corporaPath, discCSVsPath):
         
-        with open(fileList[0], "rt") as f:
+        with open(fileName, "rt") as f:
             dfData = pd.read_csv(f, header=None)
             dfData.columns = ["times", "subreddits", "wordcounts", "comments"]
         # for i in range(len(fileList)):
@@ -296,20 +304,23 @@ def runGDWFCorporaGenerator(discCSVsPath, corporaPath):
             with open(discCSVsPath + disc + ".csv", "wt") as f:
                 f.close()
     i=1
-    fileList = list()
     for filename in os.listdir(corporaPath):
         if filename.endswith(".csv"):
             if (i%10 == 0):
                 print("--- %s seconds ---" % (time.time() - start_time))
             if (i%100 == 0):
                 print("running file " + str(i) + ": " + filename)
-            fileList.append(corporaPath + "/" + filename)
-            if i > 3910:
-                runFile(globalDiscs, fileList, corporaPath, discCSVsPath)
-                fileList = list()
+            runFile(globalDiscs, filename, corporaPath, discCSVsPath)
+            
             i += 1
 
 def runGDWFCorporaCleaner(dirPath):
+  
+  # Loads discourse corpus into df
+    # randomly selects comments from df up to a certain number of words.
+    # deletes all other rows
+    # Writes new corpus as csv for further processing
+
     def runFile(dirPath, fileName):
         with open(dirPath + "/" + fileName, "rt") as f:
             dfData = pd.read_csv(f, header=None)

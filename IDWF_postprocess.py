@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 start_time = time.time()
 
+# Used to do IDWF processing on text files already created by IDWF.py
 
 def runFile(corpus, vectorWordsFile, numTrainWords, takeLog):
 

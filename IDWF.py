@@ -8,6 +8,9 @@ import math
 import time
 import matplotlib.pyplot as plt
 
+## Does IDWF processing AND creates ID-W-WD_5200 files for faster subsequent IDWF processing
+# Created files also used in GDWF processing
+
 start_time = time.time()
 
 def runFile(corpusDir, corpus, trainWordsFile, numTrainWords, threshold):
