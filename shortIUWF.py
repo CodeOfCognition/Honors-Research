@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 
 start_time = time.time()
 
-# Simple processing capabilities reading from GWDF csv files 
+# processes short IUWF corpora.
+# sorts into 4 chunks of 25,000 words iff they have 5,000+ different words
 
 
 def runFile(corpus, vectorWordsFile, numTrainWords):

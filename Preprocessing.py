@@ -406,7 +406,55 @@ def runShortIUWFCorporaCleaner(prePath, corporaDir):
                 i += 1
     print("--- %s seconds ---" % (time.time() - start_time))
 
+def runLongIUWFCorporaCleaner(prePath, corporaDir):
+    def runFile(corpusDir, corpus):
+        dfData = pd.read_csv(corpusDir + corpus, header=None)
+        dfData.columns = ["time", "subreddit", "wc", "comment"]
+        dfData = (dfData.sample(frac=1)).reset_index()
+        minTime = 2631739301 # initialized max value of unix time in the year 2053
+        maxTime = -1
+        numWords = 0 # word counter for each quantile
 
+        q = 0 # index of current quantile 
+        for index, row in dfData.iterrows():
+            numWords += dfData['wc'][index]
+            if numWords < 100000:
+                if (dfData['time'][index] > maxTime):
+                    maxTime = dfData['time'][index]
+                if (dfData['time'][index] < minTime):
+                    minTime = dfData['time'][index]
+            else:
+                if maxTime-minTime > 31536000*8:
+                    #copy these dataframe rows to a new df, sort by time, print to csv
+                    # print(dfData.head())
+                    dfNew = dfData.loc[0:index, ['comment', 'time']]
+                    # print(dfNew.head())
+                    dfNew.sort_values('time', ascending=(True)).reset_index()
+
+                    data = ""
+                    for index, row in dfNew.iterrows():
+                        data += dfNew['comment'][index]
+                    with open("/volumes/Robbie_External_Hard_Drive/longIUWF/" + corpus[0:-4] + ".txt", "wt") as f:
+                        f.write(str(maxTime-minTime) + "\n" + data)
+                break
+
+        #now we know what the smallest time is. We should check if it's smaller than a year, add it to a new file and at the top of the files say how big it is.
+
+    
+
+    i = 1
+    for filename in os.listdir(prePath + corporaDir):
+            if filename.endswith(".csv"):
+                if (i%10 == 0):
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                if (i%10 == 0):
+                    print("running file " + str(i) + ": " + filename)
+                runFile((prePath + corporaDir + '/'), filename)
+                i += 1
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+
+runLongIUWFCorporaCleaner('./corpora/', '5200_corpora_clean', )
 
 # runShortIUWFCorporaCleaner('./corpora/', '5200_corpora_clean')
 # runGDWFCorporaCleaner("./helperFiles/GDWF_discourses_5200")
