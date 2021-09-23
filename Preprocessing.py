@@ -361,51 +361,6 @@ def runGDWFCorporaCleaner(dirPath):
             runFile(dirPath, filename)
             i += 1
 
-def runShortIUWFCorporaCleaner(prePath, corporaDir):
-    def runFile(corpusDir, corpus):
-        dfData = pd.read_csv(corpusDir + corpus, header=None)
-        dfData.columns = ["time", "subreddit", "wc", "comment"]
-        dfData = dfData.sort_values('time', ascending=(True)).reset_index()
-        numWords = 0 # word counter for each quantile
-        start = 0 # index of first row in quantile
-        data = [""] # word data for each quantile
-        times = list() # list of time ranges of each quantile
-        q = 0 # index of current quantile 
-        for index, row in dfData.iterrows():
-            if numWords < 25000:
-                data[q] += dfData['comment'][index]
-                numWords += dfData['wc'][index]
-            else:
-                data.append("")
-                times.append(dfData['time'][index-1] - dfData['time'][start])
-                start = index
-                numWords = 0
-                q += 1
-        q -= 1 # adjusted to indicate the total number quantiles created
-        smallest = [0,1,2,3]
-        
-        for i in range(1, (q+1)-3): #range goes 1 more than number of quantiles minus (# of quantiles per 100,000 words - 1)
-            if times[i] + times[i+1] + times[i+2] + times[i+3] < times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]]:
-                smallest = [i, i+1, i+2, i+3]
-        if times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]] <= 31536000/2:
-            with open("/volumes/Robbie_External_Hard_Drive/shortIUWF/" + corpus[0:-4] + ".txt", "wt") as f:
-                f.write(str(times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]]) + "\n")
-                f.write(data[smallest[0]] + data[smallest[1]] + data[smallest[2]] + data[smallest[3]])
-        #now we know what the smallest time is. We should check if it's smaller than a year, add it to a new file and at the top of the files say how big it is.
-
-    
-
-    i = 1
-    for filename in os.listdir(prePath + corporaDir):
-            if filename.endswith(".csv"):
-                if (i%10 == 0):
-                    print("--- %s seconds ---" % (time.time() - start_time))
-                if (i%10 == 0):
-                    print("running file " + str(i) + ": " + filename)
-                runFile((prePath + corporaDir + '/'), filename)
-                i += 1
-    print("--- %s seconds ---" % (time.time() - start_time))
-
 def runLongIUWFCorporaCleaner(prePath, corporaDir):
     def runFile(corpusDir, corpus):
         dfData = pd.read_csv(corpusDir + corpus, header=None)
@@ -453,10 +408,188 @@ def runLongIUWFCorporaCleaner(prePath, corporaDir):
                 i += 1
     print("--- %s seconds ---" % (time.time() - start_time))
 
+def runShortIUWFCorporaCleaner(prePath, corporaDir):
+    def runFile(corpusDir, corpus):
+        dfData = pd.read_csv(corpusDir + corpus, header=None)
+        dfData.columns = ["time", "subreddit", "wc", "comment"]
+        dfData = dfData.sort_values('time', ascending=(True)).reset_index()
+        numWords = 0 # word counter for each quantile
+        start = 0 # index of first row in quantile
+        data = [""] # word data for each quantile
+        times = list() # list of time ranges of each quantile
+        q = 0 # index of current quantile 
+        for index, row in dfData.iterrows():
+            if numWords < 25000:
+                data[q] += dfData['comment'][index]
+                numWords += dfData['wc'][index]
+            else:
+                data.append("")
+                times.append(dfData['time'][index-1] - dfData['time'][start])
+                start = index
+                numWords = 0
+                q += 1
+        q -= 1 # adjusted to indicate the total number quantiles created
+        smallest = [0,1,2,3]
+        
+        for i in range(1, (q+1)-3): #range goes 1 more than number of quantiles minus (# of quantiles per 100,000 words - 1)
+            if times[i] + times[i+1] + times[i+2] + times[i+3] < times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]]:
+                smallest = [i, i+1, i+2, i+3]
+        if times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]] <= 31536000/2:
+            with open("/volumes/Robbie_External_Hard_Drive/shortIUWF/" + corpus[0:-4] + ".txt", "wt") as f:
+                f.write(str(times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]]) + "\n")
+                f.write(data[smallest[0]] + data[smallest[1]] + data[smallest[2]] + data[smallest[3]])
+        #now we know what the smallest time is. We should check if it's smaller than a year, add it to a new file and at the top of the files say how big it is.
 
-runLongIUWFCorporaCleaner('./corpora/', '5200_corpora_clean', )
+    
 
-# runShortIUWFCorporaCleaner('./corpora/', '5200_corpora_clean')
+    i = 1
+    for filename in os.listdir(prePath + corporaDir):
+            if filename.endswith(".csv"):
+                if (i%10 == 0):
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                if (i%10 == 0):
+                    print("running file " + str(i) + ": " + filename)
+                runFile((prePath + corporaDir + '/'), filename)
+                i += 1
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+#v2 is the version that accounts for 50% or less of words coming from a single corpus
+count = 0
+def runShortIUWFCorporaCleanerv2(prePath, corporaDir):
+    def runFile(corpusDir, corpus):
+        dfData = pd.read_csv(corpusDir + corpus, header=None)
+        dfData.columns = ["time", "subreddit", "wc", "comment"]
+        dfData = dfData.sort_values('time', ascending=(True)).reset_index()
+        numWords = 0 # word counter for each quantile
+        start = 0 # index of first row in quantile
+        data = [""] # word data for each quantile
+        contentDict = [dict()] # keeps track of subreddit/wc pairs for each quantile
+        times = list() # list of time ranges of each quantile
+        q = 0 # index of current quantile 
+
+
+        for index, row in dfData.iterrows():
+            if numWords < 25000:
+                data[q] += dfData['comment'][index]
+                numWords += dfData['wc'][index]
+                try: # works if not the occurrence from a given subreddit
+                    currentWC = contentDict[q][dfData['subreddit'][index]] # current wc of current entry's subreddit value pair in contentDir
+                    contentDict[q].update({dfData['subreddit'][index]: currentWC + dfData['wc'][index]}) # updates aforementioned value pair
+                except: # for the first occurrence of a given subreddit
+                    contentDict[q][dfData['subreddit'][index]] = dfData['wc'][index]
+            else:
+                data.append("") #create new quantile with no data in it
+                contentDict.append(dict()) #creates new quantile with empty dict in it
+                times.append(dfData['time'][index-1] - dfData['time'][start])
+                start = index
+                numWords = 0
+                q += 1
+        q -= 1 # adjusted to indicate the total number quantiles created
+        smallest = [0,1,2,3]
+        
+        for i in range(1, (q+1)-3): #range goes 1 more than number of quantiles minus (# of quantiles per 100,000 words - 1)
+            if times[i] + times[i+1] + times[i+2] + times[i+3] < 31536000/2:
+                for k, v in contentDict[i+1].items():
+                    try:
+                        currentWC = contentDict[i][k]
+                        d = contentDict[i].update({k: v + currentWC})
+                    except:
+                        contentDict[i][k] = v
+                for k, v in contentDict[i+2].items():
+                    try:
+                        currentWC = contentDict[i][k]
+                        d = contentDict[i].update({k: v + currentWC})
+                    except:
+                        contentDict[i][k] = v
+                for k, v in contentDict[i+3].items():
+                    try:
+                        currentWC = contentDict[i][k]
+                        d = contentDict[i].update({k: v + currentWC})
+                    except:
+                        contentDict[i][k] = v
+                max = -1
+                for v in contentDict[i].values():
+                    if v>max:
+                        max = v
+                if max < 50000:
+                    print(contentDict[i])
+                    global count
+                    count += 1
+                    break
+
+
+        # if times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]] <= 31536000/2:
+        #     with open("/volumes/Robbie_External_Hard_Drive/shortIUWF/" + corpus[0:-4] + ".txt", "wt") as f:
+        #         f.write(str(times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]]) + "\n")
+        #         f.write(data[smallest[0]] + data[smallest[1]] + data[smallest[2]] + data[smallest[3]])
+        #now we know what the smallest time is. We should check if it's smaller than a year, add it to a new file and at the top of the files say how big it is.
+
+    
+
+    i = 1
+    for filename in os.listdir(prePath + corporaDir):
+            if filename.endswith(".csv"):
+                if (i%5 == 0):
+                    print("count: " + str(count))
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                if (i%5 == 0):
+                    print("running file " + str(i) + ": " + filename)
+                runFile((prePath + corporaDir + '/'), filename)
+                i += 1
+    print("count: " + str(count))
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+def runLongIUWFCorporaCleaner(prePath, corporaDir):
+    def runFile(corpusDir, corpus):
+        dfData = pd.read_csv(corpusDir + corpus, header=None)
+        dfData.columns = ["time", "subreddit", "wc", "comment"]
+        dfData = (dfData.sample(frac=1)).reset_index()
+        minTime = 2631739301 # initialized max value of unix time in the year 2053
+        maxTime = -1
+        numWords = 0 # word counter for each quantile
+
+        q = 0 # index of current quantile 
+        for index, row in dfData.iterrows():
+            numWords += dfData['wc'][index]
+            if numWords < 100000:
+                if (dfData['time'][index] > maxTime):
+                    maxTime = dfData['time'][index]
+                if (dfData['time'][index] < minTime):
+                    minTime = dfData['time'][index]
+            else:
+                if maxTime-minTime > 31536000*8:
+                    #copy these dataframe rows to a new df, sort by time, print to csv
+                    # print(dfData.head())
+                    dfNew = dfData.loc[0:index, ['comment', 'time']]
+                    # print(dfNew.head())
+                    dfNew = dfNew.sort_values('time', ascending=(True)).reset_index()
+
+                    data = ""
+                    for index, row in dfNew.iterrows():
+                        data += dfNew['comment'][index]
+                    with open("/volumes/Robbie_External_Hard_Drive/longIUWF/" + corpus[0:-4] + ".txt", "wt") as f:
+                        f.write(str(maxTime-minTime) + "\n" + data)
+                break
+
+        #now we know what the smallest time is. We should check if it's smaller than a year, add it to a new file and at the top of the files say how big it is.
+
+    
+
+    i = 1
+    for filename in os.listdir(prePath + corporaDir):
+            if filename.endswith(".csv"):
+                if (i%10 == 0):
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                if (i%10 == 0):
+                    print("running file " + str(i) + ": " + filename)
+                runFile((prePath + corporaDir + '/'), filename)
+                i += 1
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+
+# runLongIUWFCorporaCleaner('./corpora/', '5200_corpora_clean', )
+
+runShortIUWFCorporaCleaner('/volumes/Robbie_External_Hard_Drive/', '5200_corpora_clean')
 # runGDWFCorporaCleaner("./helperFiles/GDWF_discourses_5200")
 
 ### Generate file containing list of vector words ###
@@ -468,3 +601,14 @@ runLongIUWFCorporaCleaner('./corpora/', '5200_corpora_clean', )
 
 ### Generate discourse corpora from IDWF corpora discourses
 # runGDWFCorporaGenerator("./helperFiles/GDWF_discourses_5200/", "./corpora/5200_corpora_clean")
+
+d = {"sub1": 2, "sub2": 3}
+d2 = d
+sub = "sub3"
+add = 6
+try:
+    x = d[sub]
+    d.update({sub : x + add})
+except:
+    d[sub] = add
+print(d)
