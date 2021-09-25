@@ -18,7 +18,12 @@ import random
 #       IDWF analysis) to build GDWF_discourses_5200 which contains all language produced across  #
 #       5200 users in the aforementioned discourses. Note: IDWF_5200_corpora_discourses.txt is no #
 #       longer used in IDWF analysis, but it contains the correct info for 5200 users.            #
-#   - runGDWFCorporaCleaner: Creates a corpus on equal length and time of ID-W-WF_5200 corpora, but containing randomly sampled info from all users from that time period at that time
+#   - runGDWFCorporaCleaner: Creates a corpus on equal length and time of ID-W-WF_5200 corpora,   #
+#     but containing randomly sampled info from all users from that time period at that time      #
+#   - runLongIUWFCorporaCleaner
+#   - runShortIUWFCorporaCleaner
+#   - probeMinLengthAndDiscourses: finds set of all discourses used across all (5200) user        #
+#     corpora. Also finds the minimum number of words in a corpus.                                #
 ###################################################################################################
 
 #Possible problem: Some GDWF corpora contain only 1 person's language data
@@ -615,7 +620,62 @@ def probeMinLengthAndDiscourses(prePath, corporaDir):
             f.write(str(discourse) + "\n")
     print("Min user wordcount: " + str(min))
 
-probeMinLengthAndDiscourses("/Volumes/Robbie_External_Hard_Drive/", "5200_corpora_clean")
+def createDFcsv(prePath, corporaDir):
+    with open('/Volumes/Robbie_External_Hard_Drive/discourseFrequencies.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["corpus", "discourse vector"])
+
+    def runFile(corpusDir, corpus):
+        dfData = pd.read_csv(corpusDir + corpus, header=None)
+        dfData.columns = ["time", "subreddit", "wc", "comment"]
+
+        with open("./helperFiles/discourseList.txt", "rt") as f:
+            fin = f.read()
+            discourseWords = fin.split()
+            f.close
+
+        zeros = [0]*len(discourseWords)
+        d = dict(zip(discourseWords, zeros)) 
+        for index, row in dfData.iterrows():
+            key = dfData['subreddit'][index]
+            d[str(dfData['subreddit'][index])] += 1
+
+        vectorOfDiscourses = ""
+        for v in d.values():
+            vectorOfDiscourses += str(v) + " "
+
+        with open('/Volumes/Robbie_External_Hard_Drive/discourseFrequencies.csv', 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([corpus[0:-4], vectorOfDiscourses])
+
+    i=1
+    for filename in os.listdir(prePath + corporaDir):
+            if filename.endswith(".csv"):
+                if (i%10 == 0):
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                if (i%10 == 0):
+                    print("running file " + str(i) + ": " + filename)
+                runFile((prePath + corporaDir + '/'), filename)
+                i += 1
+
+
+def tester():
+    df = pd.read_csv("/Volumes/Robbie_External_Hard_Drive/discourseFrequencies.csv")
+    vector1 = df['discourse vector'][1].split(' ')[0:-1]
+    vector2 = df['discourse vector'][2].split(' ')[0:-1]
+    for i in range(0, len(vector1)):
+        vector1[i] = int(vector1[i])
+        vector2[i] = int(vector2[i])
+    vc = 1-spatial.distance.cosine(vector1, vector2)
+    print(df['corpus'][1])
+    print(df['corpus'][2])
+    print(vc)
+
+
+
+# createDFcsv("/Volumes/Robbie_External_Hard_Drive/", "5200_corpora_clean")
+
+#probeMinLengthAndDiscourses("/Volumes/Robbie_External_Hard_Drive/", "5200_corpora_clean")
 
 # runLongIUWFCorporaCleaner('./corpora/', '5200_corpora_clean', )
 
@@ -632,13 +692,3 @@ probeMinLengthAndDiscourses("/Volumes/Robbie_External_Hard_Drive/", "5200_corpor
 ### Generate discourse corpora from IDWF corpora discourses
 # runGDWFCorporaGenerator("./helperFiles/GDWF_discourses_5200/", "./corpora/5200_corpora_clean")
 
-# d = {"sub1": 2, "sub2": 3}
-# d2 = d
-# sub = "sub3"
-# add = 6
-# try:
-#     x = d[sub]
-#     d.update({sub : x + add})
-# except:
-#     d[sub] = add
-# print(d)
