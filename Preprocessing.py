@@ -643,6 +643,7 @@ def createDFcsv(prePath, corporaDir):
         vectorOfDiscourses = ""
         for v in d.values():
             vectorOfDiscourses += str(v) + " "
+        vectorOfDiscourses = vectorOfDiscourses[0:-1] #removes the extra space at the end
 
         with open('/Volumes/Robbie_External_Hard_Drive/discourseFrequencies.csv', 'a', newline='') as f:
             writer = csv.writer(f)
@@ -657,6 +658,7 @@ def createDFcsv(prePath, corporaDir):
                     print("running file " + str(i) + ": " + filename)
                 runFile((prePath + corporaDir + '/'), filename)
                 i += 1
+
 
 
 def tester():
