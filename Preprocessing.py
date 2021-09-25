@@ -586,10 +586,40 @@ def runLongIUWFCorporaCleaner(prePath, corporaDir):
                 i += 1
     print("--- %s seconds ---" % (time.time() - start_time))
 
+min = 999999999999
+def probeMinLengthAndDiscourses(prePath, corporaDir):
+    subreddits = set()
+    def runFile(corpusDir, corpus):
+        dfData = pd.read_csv(corpusDir + corpus, header=None)
+        dfData.columns = ["time", "subreddit", "wc", "comment"]
+        total = 0
+
+        for index, row in dfData.iterrows():
+            subreddits.add(dfData['subreddit'][index])
+            total += dfData['wc'][index]
+        global min    
+        if total < min:
+            min = total
+    
+    i = 1
+    for filename in os.listdir(prePath + corporaDir):
+            if filename.endswith(".csv"):
+                if (i%10 == 0):
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                if (i%10 == 0):
+                    print("running file " + str(i) + ": " + filename)
+                runFile((prePath + corporaDir + '/'), filename)
+                i += 1
+    with open("./helperFiles/discourseList.txt", "wt") as f:
+        for discourse in subreddits:
+            f.write(str(discourse) + "\n")
+    print("Min user wordcount: " + str(min))
+
+probeMinLengthAndDiscourses("/Volumes/Robbie_External_Hard_Drive/", "5200_corpora_clean")
 
 # runLongIUWFCorporaCleaner('./corpora/', '5200_corpora_clean', )
 
-runShortIUWFCorporaCleaner('/volumes/Robbie_External_Hard_Drive/', '5200_corpora_clean')
+# runShortIUWFCorporaCleaner('/volumes/Robbie_External_Hard_Drive/', '5200_corpora_clean')
 # runGDWFCorporaCleaner("./helperFiles/GDWF_discourses_5200")
 
 ### Generate file containing list of vector words ###
@@ -602,13 +632,13 @@ runShortIUWFCorporaCleaner('/volumes/Robbie_External_Hard_Drive/', '5200_corpora
 ### Generate discourse corpora from IDWF corpora discourses
 # runGDWFCorporaGenerator("./helperFiles/GDWF_discourses_5200/", "./corpora/5200_corpora_clean")
 
-d = {"sub1": 2, "sub2": 3}
-d2 = d
-sub = "sub3"
-add = 6
-try:
-    x = d[sub]
-    d.update({sub : x + add})
-except:
-    d[sub] = add
-print(d)
+# d = {"sub1": 2, "sub2": 3}
+# d2 = d
+# sub = "sub3"
+# add = 6
+# try:
+#     x = d[sub]
+#     d.update({sub : x + add})
+# except:
+#     d[sub] = add
+# print(d)

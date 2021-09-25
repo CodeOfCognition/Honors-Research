@@ -208,7 +208,7 @@ def run(corporaDir, vectorWordsFile, numVectorWords):
 badFiles = list()
 cosineValues = list()
 susFiles = list()
-run('/volumes/Robbie_External_Hard_Drive/shortIUWF/', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000)
+run('/volumes/Robbie_External_Hard_Drive/longIUWF/', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000)
 print("bad files:")
 print(badFiles)
 print("sus files:")
