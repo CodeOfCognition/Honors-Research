@@ -18,10 +18,15 @@ start_time = time.time()
 dfDataFrame = pd.read_csv("/Volumes/Robbie_External_Hard_Drive/discourseFrequencies.csv") #dfDataFrame = discourse frequency data frame
 l = len(dfDataFrame['corpus'])
 
-def runFile(corpusDir, corpus):
-    
+def run():
+    with open("./results/wf_df.csv", "wt", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["df similarity", "wf similarity"])
 
-    for row, index in dfDataFrame.iterrows():
+    for index, row in dfDataFrame.iterrows():
+        if (index%10 == 0):
+                print("running file " + str(index) + " " + str(dfDataFrame['corpus'][index]) + ": ")
+                print("--- %s seconds ---" % (time.time() - start_time))
         tmp = -1
         while (tmp == -1) or (tmp == index):
             tmp = random.randint(0, l-1)
@@ -60,27 +65,15 @@ def runFile(corpusDir, corpus):
         for word in wordData2:
             dictionary2[word] += 1
         
-        x = pd.DataFrame({'vector1': dictionary1.values(), 'vector2': dictionary2.values()})
+        # x = pd.DataFrame({'vector1': dictionary1.values(), 'vector2': dictionary2.values()})
     
         wordVector1 = list(dictionary1.values())
         wordVector2 = list(dictionary2.values())
 
-        wfVC = 1-spatial.distance.cosine(vector1, vector2) #word frequency vector cosine
+        wfVC = 1-spatial.distance.cosine(wordVector1, wordVector2) #word frequency vector cosine
 
-    #write df and wf to a file
+        with open("./results/wf_df.csv", "a", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([dfVC, wfVC])
 
-def run(prePath, corporaDir):
-    with open("./results/wf_df.csv", "wt") as f:
-        writer = csv.writer(f)
-        writer.writerow(["df similarity", "wf similarity"])
-
-    i = 1
-    for filename in os.listdir(prePath + corporaDir):
-        if filename.endswith(".csv"):
-            if (i%10 == 0):
-                print("--- %s seconds ---" % (time.time() - start_time))
-            if (i%10 == 0):
-                print("running file " + str(i) + ": " + filename)
-            runFile((prePath + corporaDir + '/'), filename)
-            i += 1
-
+run()

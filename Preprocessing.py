@@ -675,7 +675,7 @@ def tester():
 
 
 
-# createDFcsv("/Volumes/Robbie_External_Hard_Drive/", "5200_corpora_clean")
+createDFcsv("/Volumes/Robbie_External_Hard_Drive/", "5200_corpora_clean")
 
 #probeMinLengthAndDiscourses("/Volumes/Robbie_External_Hard_Drive/", "5200_corpora_clean")
 
