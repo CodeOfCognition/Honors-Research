@@ -489,7 +489,7 @@ def runShortIUWFCorporaCleanerv2(prePath, corporaDir):
                 start = index
                 numWords = 0
                 q += 1
-        q -= 1 # adjusted to indicate the total number quantiles created
+        q -= 2 # adjusted to indicate the total number quantiles created and also to exclude the last unfinished quantile
 
         for i in range(0, (q+1)-3): #range goes 1 more than number of quantiles minus (# of quantiles per 100,000 words - 1)
             if times[i] + times[i+1] + times[i+2] + times[i+3] < 31536000/2:

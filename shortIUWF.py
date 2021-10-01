@@ -18,7 +18,7 @@ def runFile(corpus, vectorWordsFile, numTrainWords):
     data = ""
     with open(corpus, 'rt') as f:
         length = f.readline()
-        data = f.readline()
+        data = (f.readline())[:-1] #Removes space at the end
     
 
     with open(vectorWordsFile, "rt") as f:
@@ -34,6 +34,9 @@ def runFile(corpus, vectorWordsFile, numTrainWords):
 
     listedData = data.split(' ')
     totalWords = len(listedData)
+    if(totalWords < 100000):
+        print(totalWords)
+        return
 
     check = 0
     setOfWords = set()

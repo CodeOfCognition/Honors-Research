@@ -33,7 +33,6 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
     dictionary3 = dict(zip(train_words, zeros)) 
     dictionary4 = dict(zip(train_words, zeros)) 
 
-    a = dfData['comment'].str
     listedData = (dfData['comment'].str.cat(sep=' ').split())
     totalWords = len(listedData)
 
@@ -52,7 +51,8 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
         else:
             dictionary4[listedData[i]] += 1
             check += 1
-        
+
+    # the following line may be useless...must look into later    
     x = pd.DataFrame({'Words': dictionary1.keys(), 'Frequency1': dictionary1.values(), 'Frequency2': dictionary2.values(), 'Frequency3': dictionary3.values(), 'Frequency4': dictionary4.values()})
     
     f1 = list(dictionary1.values())
