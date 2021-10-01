@@ -439,7 +439,7 @@ def runShortIUWFCorporaCleaner(prePath, corporaDir):
         for i in range(1, (q+1)-3): #range goes 1 more than number of quantiles minus (# of quantiles per 100,000 words - 1)
             if times[i] + times[i+1] + times[i+2] + times[i+3] < times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]]:
                 smallest = [i, i+1, i+2, i+3]
-        if times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]] <= 31536000/2:
+        if times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]] <= 31536000/2: # 3153600/2 is 6 months
             with open("/volumes/Robbie_External_Hard_Drive/shortIUWF/" + corpus[0:-4] + ".txt", "wt") as f:
                 f.write(str(times[smallest[0]] + times[smallest[1]] + times[smallest[2]] + times[smallest[3]]) + "\n")
                 f.write(data[smallest[0]] + data[smallest[1]] + data[smallest[2]] + data[smallest[3]])
@@ -477,7 +477,7 @@ def runShortIUWFCorporaCleanerv2(prePath, corporaDir):
             if numWords < 25000:
                 data[q] += dfData['comment'][index]
                 numWords += dfData['wc'][index]
-                try: # works if not the occurrence from a given subreddit
+                try: # works if not the first occurrence from a given subreddit
                     currentWC = contentDict[q][dfData['subreddit'][index]] # current wc of current entry's subreddit value pair in contentDir
                     contentDict[q].update({dfData['subreddit'][index]: currentWC + dfData['wc'][index]}) # updates aforementioned value pair
                 except: # for the first occurrence of a given subreddit
@@ -490,16 +490,15 @@ def runShortIUWFCorporaCleanerv2(prePath, corporaDir):
                 numWords = 0
                 q += 1
         q -= 1 # adjusted to indicate the total number quantiles created
-        smallest = [0,1,2,3]
-        
-        for i in range(1, (q+1)-3): #range goes 1 more than number of quantiles minus (# of quantiles per 100,000 words - 1)
+
+        for i in range(0, (q+1)-3): #range goes 1 more than number of quantiles minus (# of quantiles per 100,000 words - 1)
             if times[i] + times[i+1] + times[i+2] + times[i+3] < 31536000/2:
                 for k, v in contentDict[i+1].items():
                     try:
-                        currentWC = contentDict[i][k]
-                        d = contentDict[i].update({k: v + currentWC})
+                        currentWC = contentDict[i][k] #if current subreddit k exists in dict i, then currentWC = the current wc of subreddit k in dict i
+                        d = contentDict[i].update({k: v + currentWC}) #the value associated with k in dict i is summed with the value of v (from dict 2)
                     except:
-                        contentDict[i][k] = v
+                        contentDict[i][k] = v #this case occurs when k does not exist yet in dictionary i
                 for k, v in contentDict[i+2].items():
                     try:
                         currentWC = contentDict[i][k]
@@ -512,14 +511,17 @@ def runShortIUWFCorporaCleanerv2(prePath, corporaDir):
                         d = contentDict[i].update({k: v + currentWC})
                     except:
                         contentDict[i][k] = v
+                #By this point, dictionaries i, i+1, i+2, and i+3 have been combined into dictionary i
                 max = -1
                 for v in contentDict[i].values():
                     if v>max:
                         max = v
                 if max < 50000:
-                    print(contentDict[i])
+                    with open("/volumes/Robbie_External_Hard_Drive/shortIUWF/" + corpus[0:-4] + ".txt", "wt") as f:
+                        f.write(str(times[i] + times[i+1] + times[i+2] + times[i+3]) + "\n")
+                        f.write(data[i] + data[i+2] + data[i+3] + data[i+4])
                     global count
-                    count += 1
+                    count +=1
                     break
 
 
@@ -659,8 +661,6 @@ def createDFcsv(prePath, corporaDir):
                 runFile((prePath + corporaDir + '/'), filename)
                 i += 1
 
-
-
 def tester():
     df = pd.read_csv("/Volumes/Robbie_External_Hard_Drive/discourseFrequencies.csv")
     vector1 = df['discourse vector'][1].split(' ')[0:-1]
@@ -674,14 +674,13 @@ def tester():
     print(vc)
 
 
+# createDFcsv("/Volumes/Robbie_External_Hard_Drive/", "5200_corpora_clean")
 
-createDFcsv("/Volumes/Robbie_External_Hard_Drive/", "5200_corpora_clean")
-
-#probeMinLengthAndDiscourses("/Volumes/Robbie_External_Hard_Drive/", "5200_corpora_clean")
+# probeMinLengthAndDiscourses("/Volumes/Robbie_External_Hard_Drive/", "5200_corpora_clean")
 
 # runLongIUWFCorporaCleaner('./corpora/', '5200_corpora_clean', )
 
-# runShortIUWFCorporaCleaner('/volumes/Robbie_External_Hard_Drive/', '5200_corpora_clean')
+runShortIUWFCorporaCleanerv2('/volumes/Robbie_External_Hard_Drive/', '5200_corpora_clean')
 # runGDWFCorporaCleaner("./helperFiles/GDWF_discourses_5200")
 
 ### Generate file containing list of vector words ###
