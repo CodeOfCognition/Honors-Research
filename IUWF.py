@@ -8,15 +8,15 @@ import os
 import json
 import time
 import matplotlib.pyplot as plt
+import random
 
-# Still need to implement Log feature. Otherwise, fully functional.
-
-
+global badUsers 
+badUsers = list()
 start_time = time.time()
 
 def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
     dfData = pd.read_csv(corpus, header=None)
-    dfData.columns = ["time", "subreddit", "comment"]
+    dfData.columns = ["time", "subreddit", "wc", "comment"]
     if not runControl:
         dfData = dfData.sort_values('time', ascending=(True)).reset_index()
     else:
@@ -33,12 +33,25 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
     dictionary3 = dict(zip(train_words, zeros)) 
     dictionary4 = dict(zip(train_words, zeros)) 
 
-    listedData = (dfData['comment'].str.cat(sep=' ').split())
+    listedData = (dfData['comment'].str.cat(sep=''))
+    listedData = listedData.split(' ')[:-1]
     totalWords = len(listedData)
 
+    toAdd = random.sample(range(totalWords), 100000)
+    toAdd.sort()
+    newListedData = list()
+    for i in toAdd:
+        newListedData.append(listedData[i])
+    totalWords = len(newListedData)
+    if not totalWords == 100000:
+        print("error - word length wrong with " + str(totalWords) + "words")
+
+
     check = 0
-    
+    uniqueWords = set()
+
     for i in range(totalWords):
+        uniqueWords.add(listedData[i])
         if i <= (totalWords//4):
             dictionary1[listedData[i]] += 1
             check += 1
@@ -51,9 +64,10 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
         else:
             dictionary4[listedData[i]] += 1
             check += 1
+    if(len(uniqueWords) < 5000):
+        badUsers.append(corpus[:-4])
+        return
 
-    # the following line may be useless...must look into later    
-    x = pd.DataFrame({'Words': dictionary1.keys(), 'Frequency1': dictionary1.values(), 'Frequency2': dictionary2.values(), 'Frequency3': dictionary3.values(), 'Frequency4': dictionary4.values()})
     
     f1 = list(dictionary1.values())
     f2 = list(dictionary2.values())
@@ -214,15 +228,34 @@ def genHistogram(titlename):
 
 def run(prePath, corporaDir, vectorWordsFile, numVectorWords, takeLog, runControl):
 
+    randomFileIndexList = random.sample(range(5201), 2825)
+    randomFileIndexList.sort()
+    unusedFiles = list()
     i = 1
+    j = 1
     for filename in os.listdir(prePath + corporaDir):
+        if i in randomFileIndexList:
             if filename.endswith(".csv"):
-                if (i%25 == 0):
+                if (j%25 == 0):
                     print("--- %s seconds ---" % (time.time() - start_time))
-                if (i%25 == 0):
-                    print("running file " + str(i) + ": " + filename)
+                if (j%25 == 0):
+                    print("running file " + str(j) + " of " + str(i) + ": " + filename)
+                    print("Bad User Count: " + str(len(badUsers)))
                 runFile(((prePath + corporaDir + '/' + filename)), vectorWordsFile, numVectorWords, takeLog, runControl)
-                i += 1
+                j += 1
+        else:
+            unusedFiles.append(filename)
+        i += 1
+
+    i = 0
+    randomExtraIndexes = random.sample(range(len(unusedFiles)), len(unusedFiles))
+    for j in randomExtraIndexes:
+        if (len(badUsers) - i) == 0:
+            break
+        else:
+            runFile(((prePath + corporaDir + '/' + unusedFiles[j])), vectorWordsFile, numVectorWords, takeLog, runControl)
+            i += 1
+
     analyze(cosineValues)
     print("--- %s seconds ---" % (time.time() - start_time))
     print(corporaDir + "\t" + str(vectorWordsFile) + "\t" + str(numVectorWords))
@@ -230,8 +263,9 @@ def run(prePath, corporaDir, vectorWordsFile, numVectorWords, takeLog, runContro
 
 
 cosineValues = list()
-run('./corpora/', '1200_corpora_clean_stops', './helperFiles/vector_words_150000_derived_5200_corpora_stops.txt', 150000, True, False)
-genHistogram("1200, stops, log")
+run('/Volumes/Robbie_External_Hard_Drive/', '5200_corpora_clean', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, False, False)
+print("Bad Users: " + str(len(badUsers)) + "\n" + str(badUsers))
+genHistogram("5200")
 
              
 

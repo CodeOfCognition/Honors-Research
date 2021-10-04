@@ -6,6 +6,7 @@ from scipy import spatial
 import os
 import math
 import time
+import random
 import matplotlib.pyplot as plt
 
 start_time = time.time()
@@ -31,10 +32,21 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog):
 
     listedData = data.split(' ')[0:-1]
     totalWords = len(listedData)
+    if(totalWords>100000):
+        numToRemove = totalWords - 100000
+        toRemove = random.sample(range(totalWords), numToRemove)
+        toRemove.sort(reverse=True)
+        for i in toRemove:
+            listedData.pop(i)
+    totalWords = len(listedData)
+    if not totalWords == 100000:
+        print("error - word length wrong with " + str(totalWords) + "words")
 
     check = 0
-    
+    uniqueWords = set()
+
     for i in range(totalWords):
+        uniqueWords.add(listedData[i])
         if i <= (totalWords//4):
             dictionary1[listedData[i]] += 1
             check += 1
@@ -47,8 +59,9 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog):
         else:
             dictionary4[listedData[i]] += 1
             check += 1
-        
-    x = pd.DataFrame({'Words': dictionary1.keys(), 'Frequency1': dictionary1.values(), 'Frequency2': dictionary2.values(), 'Frequency3': dictionary3.values(), 'Frequency4': dictionary4.values()})
+    if(len(uniqueWords) < 5000):
+        return
+    
     
     f1 = list(dictionary1.values())
     f2 = list(dictionary2.values())
@@ -93,8 +106,7 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog):
     vc34 = 1-spatial.distance.cosine(f3, f4)
     cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
     # print(cosineValues)
-    # if (vc12 < .4 or vc23 <.4 or vc34 < .4):
-    #     abnormalUsers.append(corpus)
+
 
 def analyze(cosineArray):
     vc12Ave = 0
@@ -225,7 +237,7 @@ def run(corporaDir, vectorWordsFile, numVectorWords, takeLog):
 
 abnormalUsers = [""]
 cosineValues = list()
-run('./corpora/ID-W-WF_5200', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, False)
+run('./corpora/IDWF_5200', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, False)
 genHistogram("ID-W-WF 5200")
 
 
