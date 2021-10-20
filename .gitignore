@@ -4,11 +4,8 @@
 # Ignore node_modules folder
 node_modules
 
-# Ignore corpora
-corpora
+data
 
-helperFiles/GDWF_discourses_*
-
-helperFiles/removed_ID-W-WD_files
+Legacy_Code/V2/helperFiles
 
 tempCodeRunnerFile.py
