@@ -9,31 +9,39 @@ import json
 import time
 import matplotlib.pyplot as plt
 import random
+import argparse
+from analyzeAndGraph import analyze, genHistogram
+
+#Parse arguments from command line
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--corpora_directory')
+parser.add_argument('-v', '--vector_words_file')
+parser.add_argument('-control', '--true_or_false') #must be 0 for false, or 1 for true
+args = parser.parse_args()
+corporaDir = args.corpora_directory
+vectorWordsFile = args.vector_words_file
+runControl = int(args.true_or_false)
 
 global badUsers 
 badUsers = list()
 start_time = time.time()
 
-def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
-    dfData = pd.read_csv(corpus, header=None)
-    dfData.columns = ["time", "subreddit", "wc", "comment"]
+def importData(corpus, runControl):
+    df = pd.read_csv(corpus, header=None)
+    df.columns = ["time", "subreddit", "wc", "comment"]
     if not runControl:
-        dfData = dfData.sort_values('time', ascending=(True)).reset_index()
+        df = df.sort_values('time', ascending=(True)).reset_index()
     else:
-        dfData = dfData.sample(frac=1)
+        df = df.sample(frac=1)
 
     with open(vectorWordsFile, "rt") as f:
         fin = f.read()
-        train_words = fin.split()
+        vectorWords = fin.split()
         f.close
+    return df, vectorWords
 
-    zeros = [0]*numTrainWords # size of WF vector
-    dictionary1 = dict(zip(train_words, zeros)) 
-    dictionary2 = dict(zip(train_words, zeros)) 
-    dictionary3 = dict(zip(train_words, zeros)) 
-    dictionary4 = dict(zip(train_words, zeros)) 
-
-    listedData = (dfData['comment'].str.cat(sep=''))
+def getRandomSamples(df, vectorWords):
+    listedData = (df['comment'].str.cat(sep=''))
     listedData = listedData.split(' ')[:-1]
     totalWords = len(listedData)
 
@@ -42,11 +50,22 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
     newListedData = list()
     for i in toAdd:
         newListedData.append(listedData[i])
+
+    #Delete following three lines
     totalWords = len(newListedData)
     if not totalWords == 100000:
         print("error - word length wrong with " + str(totalWords) + "words")
+    return newListedData
 
+def createQuantiles(vectorWords, listedData, corpus):
 
+    zeros = [0]*150000 # size of WF vector
+    dictionary1 = dict(zip(vectorWords, zeros)) 
+    dictionary2 = dict(zip(vectorWords, zeros)) 
+    dictionary3 = dict(zip(vectorWords, zeros)) 
+    dictionary4 = dict(zip(vectorWords, zeros)) 
+
+    totalWords = len(listedData)
     check = 0
     uniqueWords = set()
 
@@ -65,44 +84,29 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
             dictionary4[listedData[i]] += 1
             check += 1
     if(len(uniqueWords) < 5000):
-        badUsers.append(corpus[:-4])
-        return
+        return 0,0,0,0,-1 # indicates corpus quantiles were not created
+    return dictionary1, dictionary2, dictionary3, dictionary4, 1
 
+def runFile(corpus, vectorWordsFile, runControl):
+
+    results = importData(corpus, vectorWordsFile)
+    df, vectorWords = results[0], results[1]
+
+    listedData = getRandomSamples(df, vectorWords) #gets 100,000 randomly sampled words
+
+    results = createQuantiles(vectorWords, listedData, corpus)
+    if results[4] == -1:
+        return 0 #unusable corpus
+
+    dictionary1 = results[0]
+    dictionary2 = results[1]
+    dictionary3 = results[2]
+    dictionary4 = results[3]
     
     f1 = list(dictionary1.values())
     f2 = list(dictionary2.values())
     f3 = list(dictionary3.values())
     f4 = list(dictionary4.values())
-    
-    if takeLog:
-        temp = list()
-        for value in f1:
-            if value != 0:
-                temp.append(math.log10(value))
-            else:
-                temp.append(0)
-        f1 = temp
-        temp = list()
-        for value in f2:
-            if value != 0:
-                temp.append(math.log10(value))
-            else:
-                temp.append(0)
-        f2 = temp
-        temp = list()
-        for value in f3:
-            if value != 0:
-                temp.append(math.log10(value))
-            else:
-                temp.append(0)
-        f3 = temp
-        temp = list()
-        for value in f4:
-            if value != 0:
-                temp.append(math.log10(value))
-            else:
-                temp.append(0)
-        f4 = temp
 
     vc12 = 1-spatial.distance.cosine(f1, f2)
     vc13 = 1-spatial.distance.cosine(f1, f3)
@@ -111,44 +115,28 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
     vc24 = 1-spatial.distance.cosine(f2, f4)
     vc34 = 1-spatial.distance.cosine(f3, f4)
     cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
+    return 1
 
-def run(prePath, corporaDir, vectorWordsFile, numVectorWords, takeLog, runControl):
-
-    randomFileIndexList = random.sample(range(5201), 2825)
-    randomFileIndexList.sort()
-    unusedFiles = list()
+def run2825Files(corporaDir, vectorWordsFile, runControl):
+    randomFileIndexList = random.sample(range(5201), 5199)
+    fileNames = list()
+    for filename in os.listdir(corporaDir):
+        fileNames.append(filename)
     i = 1
-    j = 1
-    for filename in os.listdir(prePath + corporaDir):
-        if i in randomFileIndexList:
-            if filename.endswith(".csv"):
-                if (j%25 == 0):
-                    print("--- %s seconds ---" % (time.time() - start_time))
-                if (j%25 == 0):
-                    print("running file " + str(j) + " of " + str(i) + ": " + filename)
-                    print("Bad User Count: " + str(len(badUsers)))
-                runFile(((prePath + corporaDir + '/' + filename)), vectorWordsFile, numVectorWords, takeLog, runControl)
-                j += 1
-        else:
-            unusedFiles.append(filename)
-        i += 1
-
-    i = 0
-    randomExtraIndexes = random.sample(range(len(unusedFiles)), len(unusedFiles))
-    for j in randomExtraIndexes:
-        if (len(badUsers) - i) == 0:
-            break
-        else:
-            runFile(((prePath + corporaDir + '/' + unusedFiles[j])), vectorWordsFile, numVectorWords, takeLog, runControl)
-            i += 1
-
-    # analyze(cosineValues)
-    print("--- %s seconds ---" % (time.time() - start_time))
-    print(corporaDir + "\t" + str(vectorWordsFile) + "\t" + str(numVectorWords))
-
-
+    for fileIndex in randomFileIndexList:
+        if (i%25 == 0):
+            print(f"--- {round((time.time() - start_time), 2)} seconds ---")
+            print("running file " + str(i) + ": " + fileNames[fileIndex])
+        i += runFile(((corporaDir + '/' + fileNames[fileIndex])), vectorWordsFile, runControl)
+        if i > 2825:
+            return
 
 cosineValues = list()
-run('/Volumes/Robbie_External_Hard_Drive/', '5200_corpora_clean', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, False, False)
-print("Bad Users: " + str(len(badUsers)) + "\n" + str(badUsers))
-# genHistogram("5200")
+run2825Files(corporaDir, vectorWordsFile, runControl) 
+
+analyze(cosineValues)
+print("--- %s seconds ---" % (time.time() - start_time))
+print(corporaDir + "\t" + str(vectorWordsFile))
+
+genHistogram(cosineValues, "5200", 0.5, 1, 0, 0.175)
+#cosineValues, titlename, xMin, xMax, yMin, yMax
