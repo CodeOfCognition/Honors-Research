@@ -43,6 +43,7 @@ def runFile(corpus, vectorWordsFile, numTrainWords, takeLog, runControl):
     for i in toAdd:
         newListedData.append(listedData[i])
     totalWords = len(newListedData)
+    listedData = newListedData
     if not totalWords == 100000:
         print("error - word length wrong with " + str(totalWords) + "words")
 
@@ -163,9 +164,6 @@ def analyze(cosineArray):
     print(str(vc12Ave) + "\n" + str(vc12SD) + "\n" + str(vc13Ave) + "\n" + str(vc13SD) + "\n" + str(vc14Ave) + "\n" + str(vc14SD) + "\n" + str(vc23Ave) + "\n" + str(vc23SD) + "\n" + str(vc24Ave) + "\n" + str(vc24SD) + "\n" + str(vc34Ave) + "\n" + str(vc34SD))
 
 
-
-
-
 def genHistogram(titlename):
     vc12 = list()
     vc13 = list()
@@ -228,7 +226,7 @@ def genHistogram(titlename):
 
 def run(prePath, corporaDir, vectorWordsFile, numVectorWords, takeLog, runControl):
 
-    randomFileIndexList = random.sample(range(5201), 2825)
+    randomFileIndexList = random.sample(range(5201), 150)
     randomFileIndexList.sort()
     unusedFiles = list()
     i = 1
@@ -263,7 +261,7 @@ def run(prePath, corporaDir, vectorWordsFile, numVectorWords, takeLog, runContro
 
 
 cosineValues = list()
-run('/Volumes/Robbie_External_Hard_Drive/', '5200_corpora_clean', './helperFiles/vector_words_150000_derived_5200_corpora.txt', 150000, False, False)
+run("/Users/robdow/Desktop/honors research/Coding/data/corpora/", '5200_corpora_clean', '/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt', 150000, False, False)
 print("Bad Users: " + str(len(badUsers)) + "\n" + str(badUsers))
 genHistogram("5200")
 

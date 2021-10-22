@@ -12,21 +12,23 @@ import random
 import argparse
 from analyzeAndGraph import analyze, genHistogram
 
-#Parse arguments from command line
-parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--corpora_directory')
-parser.add_argument('-v', '--vector_words_file')
-parser.add_argument('-control', '--true_or_false') #must be 0 for false, or 1 for true
-args = parser.parse_args()
-corporaDir = args.corpora_directory
-vectorWordsFile = args.vector_words_file
-runControl = int(args.true_or_false)
+# #Parse arguments from command line
+# parser = argparse.ArgumentParser()
+# parser.add_argument('-c', '--corpora_directory')
+# parser.add_argument('-v', '--vector_words_file')
+# parser.add_argument('-control', '--true_or_false') #must be 0 for false, or 1 for true
+# args = parser.parse_args()
+# corporaDir = args.corpora_directory
+# vectorWordsFile = args.vector_words_file
+# runControl = int(args.true_or_false)
 
-global badUsers 
-badUsers = list()
+corporaDir = "/Users/robdow/Desktop/honors research/Coding/data/corpora/5200_corpora_clean"
+vectorWordsFile = "/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt"
+runControl = False
+
 start_time = time.time()
 
-def importData(corpus, runControl):
+def importData(corpus, vectorWordsFile, runControl):
     df = pd.read_csv(corpus, header=None)
     df.columns = ["time", "subreddit", "wc", "comment"]
     if not runControl:
@@ -47,6 +49,7 @@ def getRandomSamples(df, vectorWords):
 
     toAdd = random.sample(range(totalWords), 100000)
     toAdd.sort()
+    # print(f"toAdd: {toAdd[0]}, {toAdd[1]}, {toAdd[2]}, {toAdd[3]}, {toAdd[4]}")
     newListedData = list()
     for i in toAdd:
         newListedData.append(listedData[i])
@@ -89,7 +92,7 @@ def createQuantiles(vectorWords, listedData, corpus):
 
 def runFile(corpus, vectorWordsFile, runControl):
 
-    results = importData(corpus, vectorWordsFile)
+    results = importData(corpus, vectorWordsFile, runControl)
     df, vectorWords = results[0], results[1]
 
     listedData = getRandomSamples(df, vectorWords) #gets 100,000 randomly sampled words
@@ -118,14 +121,14 @@ def runFile(corpus, vectorWordsFile, runControl):
     return 1
 
 def run2825Files(corporaDir, vectorWordsFile, runControl):
-    randomFileIndexList = random.sample(range(5201), 5199)
+    randomFileIndexList = random.sample(range(5200), 5200)
     fileNames = list()
     for filename in os.listdir(corporaDir):
         fileNames.append(filename)
     i = 1
     for fileIndex in randomFileIndexList:
         if (i%25 == 0):
-            print(f"--- {round((time.time() - start_time), 2)} seconds ---")
+            print("--- " + str(round((time.time() - start_time), 2)) + " seconds ---")
             print("running file " + str(i) + ": " + fileNames[fileIndex])
         i += runFile(((corporaDir + '/' + fileNames[fileIndex])), vectorWordsFile, runControl)
         if i > 2825:

@@ -58,7 +58,7 @@ def analyze(cosineArray):
     else:
         print("Error: no values to calculate")
     print("\nAfter " + str(count) + "trials, \n 1to2: " + str(vc12Ave) + "\tSE: " + str(vc12SE) + "\n 1to3: " + str(vc13Ave) + "\tSE: " + str(vc13SE) + "\n 1to4: "+ str(vc14Ave) + "\tSE: " + str(vc14SE) + "\n 2to3: " + str(vc23Ave) + "\tSE: " + str(vc23SE) + "\n 2to4: " + str(vc24Ave) + "\tSE: " + str(vc24SE) + "\n 3to4: " + str(vc34Ave) + "\tSE: " + str(vc34SE))
-    # print(str(vc12Ave) + "\n" + "\n" + str(vc12SE) + "\n" + str(vc13Ave) + "\n" + "\n" + str(vc13SE) + "\n" + str(vc14Ave) + "\n" + "\n" + str(vc14SE) + "\n" + str(vc23Ave) + "\n" + "\n" + str(vc23SE) + "\n" + str(vc24Ave) + "\n" + "\n" + str(vc24SE) + "\n" + str(vc34Ave) + "\n" +  "\n" + str(vc34SE))
+    print(str(vc12Ave) + "\n" + str(vc12SE) + "\n" + str(vc13Ave) + "\n" + str(vc13SE) + "\n" + str(vc14Ave) + "\n" + str(vc14SE) + "\n" + str(vc23Ave) + "\n" + str(vc23SE) + "\n" + str(vc24Ave) + "\n" + str(vc24SE) + "\n" + str(vc34Ave) + "\n" + str(vc34SE))
 
     return [vc12Ave, vc13Ave, vc14Ave, vc23Ave, vc24Ave, vc34Ave], [vc12SE, vc13SE, vc14SE, vc23SE, vc24SE, vc34SE] 
 
