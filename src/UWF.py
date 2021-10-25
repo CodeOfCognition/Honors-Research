@@ -12,6 +12,8 @@ import random
 import argparse
 from analyzeAndGraph import analyze, genHistogram
 
+### File input arguments ###
+
 # #Parse arguments from command line
 # parser = argparse.ArgumentParser()
 # parser.add_argument('-c', '--corpora_directory')
@@ -26,21 +28,22 @@ corporaDir = "/Users/robdow/Desktop/honors research/Coding/data/corpora/5200_cor
 vectorWordsFile = "/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt"
 runControl = False
 
+# Gets name of corpus directory (cuts off path leading up to it)
+index = corporaDir.rfind("/")
+corporaDirName = corporaDir[index + 1:]
+
+
+
 start_time = time.time()
 
-def importData(corpus, vectorWordsFile, runControl):
+def importData(corpus, runControl):
     df = pd.read_csv(corpus, header=None)
     df.columns = ["time", "subreddit", "wc", "comment"]
     if not runControl:
         df = df.sort_values('time', ascending=(True)).reset_index()
     else:
         df = df.sample(frac=1)
-
-    with open(vectorWordsFile, "rt") as f:
-        fin = f.read()
-        vectorWords = fin.split()
-        f.close
-    return df, vectorWords
+    return df
 
 def getRandomSamples(df, vectorWords):
     listedData = (df['comment'].str.cat(sep=''))
@@ -90,22 +93,7 @@ def createQuantiles(vectorWords, listedData, corpus):
         return 0,0,0,0,-1 # indicates corpus quantiles were not created
     return dictionary1, dictionary2, dictionary3, dictionary4, 1
 
-def runFile(corpus, vectorWordsFile, runControl):
-
-    results = importData(corpus, vectorWordsFile, runControl)
-    df, vectorWords = results[0], results[1]
-
-    listedData = getRandomSamples(df, vectorWords) #gets 100,000 randomly sampled words
-
-    results = createQuantiles(vectorWords, listedData, corpus)
-    if results[4] == -1:
-        return 0 #unusable corpus
-
-    dictionary1 = results[0]
-    dictionary2 = results[1]
-    dictionary3 = results[2]
-    dictionary4 = results[3]
-    
+def processQuantiles(dictionary1, dictionary2, dictionary3, dictionary4):
     f1 = list(dictionary1.values())
     f2 = list(dictionary2.values())
     f3 = list(dictionary3.values())
@@ -118,9 +106,34 @@ def runFile(corpus, vectorWordsFile, runControl):
     vc24 = 1-spatial.distance.cosine(f2, f4)
     vc34 = 1-spatial.distance.cosine(f3, f4)
     cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
+
+def writeResults(cosineValues):
+    with open("./data/results/IUWF_" + corporaDirName + ".csv", "wt") as f:
+        f.write("vc12,vc13,vc14,vc23,vc24,vc34\n")
+        for lst in cosineValues:
+            for i in range(6):
+                if not i == 5:
+                    f.write(str(lst[i]) + ",")
+                else:
+                    f.write(str(lst[i]) + "\n")
+
+def runFile(corpus, vectorWords, runControl):
+
+    df = importData(corpus, runControl)
+
+    listedData = getRandomSamples(df, vectorWords) #gets 100,000 randomly sampled words
+
+    results = createQuantiles(vectorWords, listedData, corpus)
+    if results[4] == -1:
+        return 0 #unusable corpus
+
+    dictionary1, dictionary2, dictionary3, dictionary4 = results[0], results[1], results[2], results[3]
+    
+    processQuantiles(dictionary1, dictionary2, dictionary3, dictionary4)
+
     return 1
 
-def run2825Files(corporaDir, vectorWordsFile, runControl):
+def run2825Files(corporaDir, vectorWords, runControl):
     randomFileIndexList = random.sample(range(5200), 5200)
     fileNames = list()
     for filename in os.listdir(corporaDir):
@@ -128,18 +141,22 @@ def run2825Files(corporaDir, vectorWordsFile, runControl):
     i = 1
     for fileIndex in randomFileIndexList:
         if (i%25 == 0):
-            print("--- " + str(round((time.time() - start_time), 2)) + " seconds ---")
-            print("running file " + str(i) + ": " + fileNames[fileIndex])
-        i += runFile(((corporaDir + '/' + fileNames[fileIndex])), vectorWordsFile, runControl)
-        if i > 2825:
+            print(f"--- {round((time.time() - start_time), 2)} seconds ---")
+            print(f"running file {i}: {fileNames[fileIndex]}")
+        i += runFile(((corporaDir + '/' + fileNames[fileIndex])), vectorWords, runControl)
+        if i > 10:
             return
 
 cosineValues = list()
-run2825Files(corporaDir, vectorWordsFile, runControl) 
-
+with open(vectorWordsFile, "rt") as f:
+        fin = f.read()
+        vectorWords = fin.split()
+        f.close
+run2825Files(corporaDir, vectorWords, runControl) 
+writeResults(cosineValues)
 analyze(cosineValues)
 print("--- %s seconds ---" % (time.time() - start_time))
-print(corporaDir + "\t" + str(vectorWordsFile))
+print(f"IUWF analysis complete after {len(cosineValues)} trials ran.\nPlease copy the results printed above for average cosine values and standard errors.\nA copy of the resulting cosine values for each trial are printed in data/results/IUWF_(nameOfCorporaDirectory).csv")
 
 genHistogram(cosineValues, "5200", 0.5, 1, 0, 0.175)
 #cosineValues, titlename, xMin, xMax, yMin, yMax
