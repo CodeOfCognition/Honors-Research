@@ -117,7 +117,7 @@ if __name__ == "__main__":
     # # Parse arguments from command line
     # parser = argparse.ArgumentParser()
     # parser.add_argument('-c', '--corpora_directory') #expects cleaned corpora 
-    # parser.add_argument('-d', '--vector_discourses_file') #expects cleaned corpora 
+    # parser.add_argument('-v', '--vector_discourses_file') #expects cleaned corpora 
     # args = parser.parse_args()
     # corporaDir = args.corpora_directory
     # vectorDiscoursesFile = args.vector_discourses_file

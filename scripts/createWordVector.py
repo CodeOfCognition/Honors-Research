@@ -8,7 +8,7 @@ import argparse
 from nltk.probability import FreqDist
 
 start_time = time.time()
-print("Running script: genVectorWords.py")
+print("Running script: createWordVector.py")
 
 #Parse arguments from command line
 parser = argparse.ArgumentParser()
