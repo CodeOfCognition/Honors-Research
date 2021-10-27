@@ -120,5 +120,5 @@ for filename in os.listdir(corporaDir):
 writeResults(cosineValues)
 analyze(cosineValues)
 print(f"Finished in: {round((time.time() - start_time), 2)} seconds")
-print(f"DWF analysis complete after {len(cosineValues)} trials ran.\nPlease copy the results printed above for average cosine values and standard errors.\nA copy of the resulting cosine values for each trial are printed in data/results/IUWF_(nameOfCorporaDirectory).csv")
+print(f"DWF analysis complete after {len(cosineValues)} trials ran.\nPlease copy the results printed above of average cosine values and standard errors.\nA copy of the resulting cosine values for each trial are printed in data/results/IUWF_(nameOfCorporaDirectory).csv")
 genHistogram(cosineValues, "DWF", .5, 1, 0, .16)

@@ -52,15 +52,10 @@ def getRandomSamples(df, vectorWords):
 
     toAdd = random.sample(range(totalWords), 100000)
     toAdd.sort()
-    # print(f"toAdd: {toAdd[0]}, {toAdd[1]}, {toAdd[2]}, {toAdd[3]}, {toAdd[4]}")
     newListedData = list()
     for i in toAdd:
         newListedData.append(listedData[i])
 
-    #Delete following three lines
-    totalWords = len(newListedData)
-    if not totalWords == 100000:
-        print("error - word length wrong with " + str(totalWords) + "words")
     return newListedData
 
 def createQuantiles(vectorWords, listedData, corpus):
@@ -108,7 +103,7 @@ def processQuantiles(dictionary1, dictionary2, dictionary3, dictionary4):
     cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
 
 def writeResults(cosineValues):
-    with open("./data/results/IUWF_" + corporaDirName + ".csv", "wt") as f:
+    with open("./data/results/UWF_" + corporaDirName + ".csv", "wt") as f:
         f.write("vc12,vc13,vc14,vc23,vc24,vc34\n")
         for lst in cosineValues:
             for i in range(6):
@@ -156,7 +151,7 @@ run2825Files(corporaDir, vectorWords, runControl)
 writeResults(cosineValues)
 analyze(cosineValues)
 print("--- %s seconds ---" % (time.time() - start_time))
-print(f"IUWF analysis complete after {len(cosineValues)} trials ran.\nPlease copy the results printed above for average cosine values and standard errors.\nA copy of the resulting cosine values for each trial are printed in data/results/IUWF_(nameOfCorporaDirectory).csv")
+print(f"UWF analysis complete after {len(cosineValues)} trials ran.\nPlease copy the results printed above of average cosine values and standard errors.\nA copy of the resulting cosine values for each trial are printed in data/results/UWF_(nameOfCorporaDirectory).csv")
 
-genHistogram(cosineValues, "5200", 0.5, 1, 0, 0.175)
+genHistogram(cosineValues, "UWF", 0.5, 1, 0, 0.175)
 #cosineValues, titlename, xMin, xMax, yMin, yMax
