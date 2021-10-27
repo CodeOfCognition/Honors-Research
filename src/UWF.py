@@ -5,7 +5,6 @@ import pandas as pd
 from scipy import spatial
 import math
 import os
-import json
 import time
 import matplotlib.pyplot as plt
 import random

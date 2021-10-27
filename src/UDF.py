@@ -55,6 +55,42 @@ def createQuantiles(vectorDiscourses, df):
         
     return dictionary1, dictionary2, dictionary3, dictionary4
 
+def getDiscourseCounts(dictionary1, dictionary2, dictionary3, dictionary4):
+    count1, count2, count3, count4 = set(), set(), set(), set()
+    for k,v in dictionary1.items():
+        if not v == 0:
+            count1.add(k)
+    for k,v in dictionary2.items():
+        if not v == 0:
+            count2.add(k)
+    for k,v in dictionary3.items():
+        if not v == 0:
+            count3.add(k)
+    for k,v in dictionary4.items():
+        if not v == 0:
+            count4.add(k)
+    return [len(count1), len(count2), len(count3), len(count4)]
+            
+def processAndWriteDiscourseCounts(discourseCounts, corporaDir):
+    sum1, sum2, sum3, sum4 = 0,0,0,0
+    for counts in discourseCounts:
+        sum1 += counts[0]
+        sum2 += counts[1]
+        sum3 += counts[2]
+        sum4 += counts[3]
+    sum1 = int(sum1/len(discourseCounts))
+    sum2 = int(sum2/len(discourseCounts))
+    sum3 = int(sum3/len(discourseCounts))
+    sum4 = int(sum4/len(discourseCounts))
+    
+    index = corporaDir.rfind("/")
+    corporaDirName = corporaDir[index + 1:]
+
+    with open(os.path.join(parentdir, "data", "results", f"UDF_Average_Discourse_Counts_{corporaDirName}.csv"), "wt") as f:
+        f.write("quantile1, quantile2, quantile3, quantile4\n")
+        f.write(f"{sum1},{sum2},{sum3},{sum4}")
+        f.close()
+
 def processQuantiles(dictionary1, dictionary2, dictionary3, dictionary4):
     f1 = list(dictionary1.values())
     f2 = list(dictionary2.values())
@@ -86,28 +122,33 @@ def runFile(corpus, vectorDiscourses):
     df = loadCorpus(corpus, vectorDiscourses)
     results = createQuantiles(vectorDiscourses, df)
     dictionary1, dictionary2, dictionary3, dictionary4 = results[0], results[1], results[2], results[3]
+    discourseCounts = getDiscourseCounts(dictionary1, dictionary2, dictionary3, dictionary4)
     cosineValue = processQuantiles(dictionary1, dictionary2, dictionary3, dictionary4)
-    return cosineValue
+    return cosineValue, discourseCounts
 
 
 def main(corporaDir, vectorDiscoursesFile):
     vectorDiscourses = loadVectorDiscourses(vectorDiscoursesFile)
     cosineValues = list()
+    discourseCounts = list()
     i = 1
     for filename in os.listdir(corporaDir):
-            if filename.endswith(".csv"):
-                if (i%10 == 0):
-                    print("--- %s seconds ---" % (time.time() - start_time))
-                if (i%10 == 0):
-                    print("running file " + str(i) + ": " + filename)
-                cosineValue = runFile((corporaDir + '/' + filename), vectorDiscourses)
-                cosineValues.append(cosineValue)
-                i += 1
+        if filename.endswith(".csv"):
+            if (i%25 == 0):
+                print("--- %s seconds ---" % (time.time() - start_time))
+            if (i%25 == 0):
+                print("running file " + str(i) + ": " + filename)
+            results = runFile((corporaDir + '/' + filename), vectorDiscourses)
+            cosineValue, discourseCount = results[0], results[1]
+            cosineValues.append(cosineValue)
+            discourseCounts.append(discourseCount)
+            i += 1
+    processAndWriteDiscourseCounts(discourseCounts, corporaDir)
     writeResults(corporaDir, cosineValues)
     analyze(cosineValues)
     print("--- %s seconds ---" % (time.time() - start_time))
     print(f"UDF analysis complete after {len(cosineValues)} trials ran.\nPlease copy the results printed above of average cosine values and standard errors.\nA copy of the resulting cosine values for each trial are printed in data/results/UDF_(nameOfCorporaDirectory).csv")
-    genHistogram(cosineValues, "UDWF", 0, 1, 0, 0.175)
+    genHistogram(cosineValues, "UDF", 0, 1, 0, 0.24)
 
 
 if __name__ == "__main__":
@@ -122,7 +163,7 @@ if __name__ == "__main__":
     # corporaDir = args.corpora_directory
     # vectorDiscoursesFile = args.vector_discourses_file
 
-    corporaDir = os.path.join(parentdir, "data", "corpora", "50_corpora_clean")
-    vectorDiscoursesFile = os.path.join(parentdir, "data", "vector_discourses_50_corpora_clean.txt")
+    corporaDir = os.path.join(parentdir, "data", "corpora", "5200_corpora_clean")
+    vectorDiscoursesFile = os.path.join(parentdir, "data", "vector_discourses_5200_corpora_clean.txt")
 
     main(corporaDir, vectorDiscoursesFile)

@@ -40,6 +40,7 @@ def main(corporaDir):
             i += 1
 
     writeResults(vectorDiscourses)
+    print("Process complete. Vector discourses file has been created and is located in the data folder.")
 
 if __name__ == "__main__":
 
