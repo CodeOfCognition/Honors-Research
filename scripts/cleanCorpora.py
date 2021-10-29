@@ -6,22 +6,15 @@ import math
 import pandas as pd
 import argparse
 
-start_time = time.time()
-print("Running script: cleanCorpora.py")
+def loadVectorWords(vectorWordsFile):
+    with open(vectorWordsFile, "rt") as f:
+        fin = f.read()
+        f.close
+    vectorWords = set(fin.split())
+    return vectorWords
 
-#Parse arguments from command line
-parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--corpora_directory')
-parser.add_argument('-v', '--vector_words_file')
-args = parser.parse_args()
-corporaDir = args.corpora_directory
-vectorWordsFile = args.vector_words_file
 
-# Gets name of corpus directory (cuts off path leading up to it)
-index = corporaDir.rfind("/")
-corporaDirName = corporaDir[index + 1:]
-
-def extractCorpusInformation(filename):
+def extractCorpusInformation(corporaDir, filename):
     with open(corporaDir + "/" + filename, "rt") as f:
         fin = f.read()
         f.close
@@ -52,7 +45,7 @@ def extractCorpusInformation(filename):
             j += 1
         return times, subreddits, rawComments
 
-def cleanComments(rawComments):
+def cleanComments(rawComments, vectorWords):
 
     with open("./data/stopList.txt", "rt") as f:
         fin = f.read()
@@ -87,12 +80,12 @@ def cleanComments(rawComments):
         wordCounts.append(wc)
     return cleanedComments, wordCounts
 
-def runFile(filename):
+def runFile(filename, vectorWords, corporaDirName):
     
-    corpusInfo = extractCorpusInformation(filename)
+    corpusInfo = extractCorpusInformation(corporaDir, filename)
     times, subreddits, rawComments = corpusInfo[0], corpusInfo[1], corpusInfo[2]
 
-    results = cleanComments(rawComments)
+    results = cleanComments(rawComments, vectorWords)
     cleanedComments, wordCounts = results[0], results[1]
 
     # Handles comments that contained only stop words or words not in vector space
@@ -112,23 +105,41 @@ def runFile(filename):
     writer = csv.writer(f)
     writer.writerows(data)
 
+def main(corporaDir, vectorWordsFile):
+
+    # Gets name of corpus directory (cuts off path leading up to it)
+    index = corporaDir.rfind("/")
+    corporaDirName = corporaDir[index + 1:]
+
+    if not os.path.isdir("./data/corpora/" + corporaDirName + "_clean"):
+        os.mkdir("./data/corpora/" + corporaDirName + "_clean")
+
+    vectorWords = loadVectorWords(vectorWordsFile)
+
+    i = 1 
+    for filename in os.listdir(corporaDir):
+            if filename.endswith(".txt"):
+                if (i%10 == 0):
+                    print(f"--- {round((time.time() - start_time), 2)} seconds ---")
+                    print ("Running file " + str(i) + ": " + filename)
+                runFile(filename, vectorWords, corporaDirName)
+                i += 1
+
+    print(f"cleanCorpora.py finished running in {round((time.time() - start_time), 2)} seconds.")
 
 
-if not os.path.isdir("./data/corpora/" + corporaDirName + "_clean"):
-    os.mkdir("./data/corpora/" + corporaDirName + "_clean")
 
-with open(vectorWordsFile, "rt") as f:
-    fin = f.read()
-    f.close
-vectorWords = set(fin.split())
+if __name__ == "__main__":
 
-i = 1 
-for filename in os.listdir(corporaDir):
-        if filename.endswith(".txt"):
-            if (i%10 == 0):
-                print(f"--- {round((time.time() - start_time), 2)} seconds ---")
-                print ("Running file " + str(i) + ": " + filename)
-            runFile(filename)
-            i += 1
+    start_time = time.time()
+    print("Running script: cleanCorpora.py")
 
-print(f"cleanCorpora.py finished running in {round((time.time() - start_time), 2)} seconds.")
+    #Parse arguments from command line
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--corpora_directory')
+    parser.add_argument('-v', '--vector_words_file')
+    args = parser.parse_args()
+    corporaDir = args.corpora_directory
+    vectorWordsFile = args.vector_words_file
+
+    main(corporaDir, vectorWordsFile)

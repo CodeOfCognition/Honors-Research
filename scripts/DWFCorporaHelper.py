@@ -6,7 +6,10 @@ from scipy import spatial
 start_time = time.time()
 
 
-corporaDir = os.getcwd() + "/data/corpora/DWF_5200_corpora_clean"
+# For personal use
+
+
+corporaDir = os.getcwd() + "/data/corpora/DWF_50_corpora_clean"
 vectorWordsFile = "/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt"
 
 # # Gets name of corpus directory (cuts off path leading up to it)
@@ -92,7 +95,7 @@ print("Above threshold of .97:")
 for file in nineseven:
     print(file)
 
-
+# Did not remove the following files:
 # /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/BlackPeopleTwitter_DubTeeDub.txt
 # /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/NoStupidQuestions_PM_ME_UR_SCOOTER.txt
 # /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/boardgames_uhhhclem.txt
