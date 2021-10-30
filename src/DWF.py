@@ -10,24 +10,12 @@ import time
 import matplotlib.pyplot as plt
 from analyzeAndGraph import analyze, genHistogram
 
-### File input arguments ###
-
-# #Parse arguments from command line
-# parser = argparse.ArgumentParser()
-# parser.add_argument('-c', '--corpora_directory')
-# parser.add_argument('-v', '--vector_words_file')
-# args = parser.parse_args()
-# corporaDir = args.corpora_directory
-# vectorWordsFile = args.vector_words_file
-
-corporaDir = "/Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean"
-vectorWordsFile = "/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt"
-
-# Gets name of corpus directory (cuts off path leading up to it)
-index = corporaDir.rfind("/")
-corporaDirName = corporaDir[index + 1:]
-
-start_time = time.time()
+def loadVectorWords(vectorWordsFile):
+    with open(vectorWordsFile, "rt") as f:
+        fin = f.read()
+        vectorWords = fin.split()
+        f.close
+    return vectorWords
 
 def importData(corpus):
     with open(corpus, "rt") as f:
@@ -35,10 +23,10 @@ def importData(corpus):
         f.close()
     return fin.split()
 
-def createQuantiles(listedDataSampled):
+def createQuantiles(listedData, vectorWords):
     check = 0
     uniqueWords = set()
-    totalWords = len(listedDataSampled)
+    totalWords = len(listedData)
 
     zeros = [0]*150000 # size of WF vector
     dictionary1 = dict(zip(vectorWords, zeros)) 
@@ -47,18 +35,18 @@ def createQuantiles(listedDataSampled):
     dictionary4 = dict(zip(vectorWords, zeros)) 
 
     for i in range(totalWords):
-        uniqueWords.add(listedDataSampled[i])
+        uniqueWords.add(listedData[i])
         if i <= (totalWords//4):
-            dictionary1[listedDataSampled[i]] += 1
+            dictionary1[listedData[i]] += 1
             check += 1
         elif i <= ((totalWords)//2):
-            dictionary2[listedDataSampled[i]] += 1
+            dictionary2[listedData[i]] += 1
             check += 1
         elif i <= ((3*totalWords)//4):
-            dictionary3[listedDataSampled[i]] += 1
+            dictionary3[listedData[i]] += 1
             check += 1
         else:
-            dictionary4[listedDataSampled[i]] += 1
+            dictionary4[listedData[i]] += 1
             check += 1
     if(len(uniqueWords) < 5000):
         return 0,0,0,0,False
@@ -77,10 +65,14 @@ def processQuantiles(dictionary1, dictionary2, dictionary3, dictionary4):
     vc23 = 1-spatial.distance.cosine(f2, f3)
     vc24 = 1-spatial.distance.cosine(f2, f4)
     vc34 = 1-spatial.distance.cosine(f3, f4)
-    cosineValues.append([vc12,vc13,vc14,vc23,vc24,vc34])
+    return [vc12,vc13,vc14,vc23,vc24,vc34]
 
-def writeResults(cosineValues):
-    with open("./data/results/DWF_" + corporaDirName + ".csv", "wt") as f:
+def writeResults(cosineValues, corporaDir):
+    # Gets name of corpus directory (cuts off path leading up to it)
+    index = corporaDir.rfind("/")
+    corporaDirName = corporaDir[index + 1:]
+
+    with open("./data/results/" + corporaDirName + ".csv", "wt") as f:
         f.write("vc12,vc13,vc14,vc23,vc24,vc34\n")
         for lst in cosineValues:
             for i in range(6):
@@ -89,36 +81,52 @@ def writeResults(cosineValues):
                 else:
                     f.write(str(lst[i]) + "\n")
 
-def runFile(corpus):
-
-    # Need to import DWF corpora data and list it to proceed
-
+def runFile(corpus, vectorWords):
     listedData = importData(corpus)
-    results = createQuantiles(listedData)
+    results = createQuantiles(listedData, vectorWords)
     dictionary1, dictionary2, dictionary3, dictionary4, usableSample = results[0], results[1], results[2], results[3], results[4]
     if not usableSample:
         return
-    processQuantiles(dictionary1, dictionary2, dictionary3, dictionary4)
-    subredditString = ""
+    return processQuantiles(dictionary1, dictionary2, dictionary3, dictionary4)
         
+def main(corporaDir, vectorWordsFile):
 
-with open(vectorWordsFile, "rt") as f:
-    fin = f.read()
-    vectorWords = fin.split()
-    f.close
-cosineValues = list()
-i = 1
-for filename in os.listdir(corporaDir):
-    if filename.endswith(".txt"):
-        if (i%10 == 0):
-            print(f"--- {round((time.time() - start_time), 2)} seconds ---")
-        if (i%10 == 0):
-            print(f"running file {i}: {filename}")
-        runFile(f"{corporaDir}/{filename}")
-        i += 1
+    vectorWords = loadVectorWords(vectorWordsFile)
+    cosineValues = list()
+    i = 1
+    for filename in os.listdir(corporaDir):
+        if i == 40:
+            break
+        if filename.endswith(".txt"):
+            if (i%10 == 0):
+                print(f"--- {round((time.time() - start_time), 2)} seconds ---")
+            if (i%10 == 0):
+                print(f"running file {i}: {filename}")
+            cosineValue = runFile(f"{corporaDir}/{filename}", vectorWords)
+            if not cosineValue == None:
+                cosineValues.append(cosineValue)
+            i += 1
 
-writeResults(cosineValues)
-analyze(cosineValues)
-print(f"Finished in: {round((time.time() - start_time), 2)} seconds")
-print(f"DWF analysis complete after {len(cosineValues)} trials ran.\nPlease copy the results printed above of average cosine values and standard errors.\nA copy of the resulting cosine values for each trial are printed in data/results/IUWF_(nameOfCorporaDirectory).csv")
-genHistogram(cosineValues, "DWF", .5, 1, 0, .16)
+    writeResults(cosineValues, corporaDir)
+    analyze(cosineValues)
+    print(f"Finished in: {round((time.time() - start_time), 2)} seconds")
+    print(f"DWF analysis complete after {len(cosineValues)} trials ran.\nPlease copy the results printed above of average cosine values and standard errors.\nA copy of the resulting cosine values for each trial are printed in data/results/(nameOfCorporaDirectory).csv")
+    genHistogram(cosineValues, "DWF", .5, 1, 0, .16)
+
+if __name__ == "__main__":
+    ### File input arguments ###
+
+    # #Parse arguments from command line
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('-c', '--corpora_directory')
+    # parser.add_argument('-v', '--vector_words_file')
+    # args = parser.parse_args()
+    # corporaDir = args.corpora_directory
+    # vectorWordsFile = args.vector_words_file
+
+    corporaDir = "/Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_50_corpora_clean"
+    vectorWordsFile = "/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt"
+
+    start_time = time.time()
+
+    main(corporaDir, vectorWordsFile)
