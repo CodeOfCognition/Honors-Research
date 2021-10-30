@@ -1,28 +1,64 @@
-import os
 import numpy as np
 import pandas as pd
 from scipy import spatial
 import math
-import os
 import time
 import matplotlib.pyplot as plt
 import random
 import csv
+from pathlib import Path
+import os, sys
+parentdir = Path(__file__).parents[1]
+sys.path.append(parentdir)
 
-start_time = time.time()
+def loadVector(vectorFile):
+    pass
 
-# in this file, df refers to discourse frequency
+def loadDiscourseDF(corporaDir):
+    # use corporaDirName to get file name to load .json file
+    pass
 
-#Pretty much implemented. Just need to debug and write to file. Sept 25 7pm
+def selectTwoCorpora(listOfUsedPairs):
+    pass
 
-dfDataFrame = pd.read_csv("/Volumes/Robbie_External_Hard_Drive/discourseFrequencies.csv") #dfDataFrame = discourse frequency data frame
-l = len(dfDataFrame['corpus'])
+def runFile(listOfUsedPairs, corporaDir, vectorDiscourses, vectorWords):
+    #create system that keeps track of if a pair is already used
+    selectTwoCorpora(listOfUsedPairs)
+    #Calc disc frequencies, and word frequencies
 
-def run():
+def main(corporaDir, vectorDiscoursesFile, vectorWordsFile):
+
+    vectorWords = loadVector(vectorWordsFile)
+    vectorDiscourses = loadVector(vectorDiscoursesFile)
+    listOfUsedPairs = set()
+
+    jsonObj = loadDiscourseDF(corporaDir)
+    for file in jsonObj:
+        results = runFile(listOfUsedPairs, corporaDir, vectorDiscourses, vectorWords)
+        # make listOfUsedPairs = that part of the result that was returned
+    
+    #create df x wf file
     with open("./results/wf_df.csv", "wt", newline='') as f:
         writer = csv.writer(f)
         writer.writerow(["df similarity", "wf similarity"])
+    
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #for each row, select a random other row (get both corpora)
     for index, row in dfDataFrame.iterrows():
         if (index%10 == 0):
                 print("running file " + str(index) + " " + str(dfDataFrame['corpus'][index]) + ": ")
@@ -78,4 +114,23 @@ def run():
             writer = csv.writer(f)
             writer.writerow([dfVC, wfVC])
 
-run()
+if __name__ == "__main__":
+
+    start_time = time.time()
+    print("Running model: WFxDF.py")
+
+    # # Parse arguments from command line
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('-c', '--corpora_directory') #expects cleaned corpora 
+    # parser.add_argument('-vd', '--vector_discourses_file') 
+    # parser.add_argument('-vw', '--vector_words_file') 
+    # args = parser.parse_args()
+    # corporaDir = args.corpora_directory
+    # vectorDiscoursesFile = args.vector_discourses_file
+    # vectorWordsFile = args.vector_words_file
+
+    corporaDir = os.path.join(parentdir, "data", "corpora", "50_corpora_clean")
+    vectorDiscoursesFile = os.path.join(parentdir, "data", "vector_discourses_50_corpora_clean.txt")
+    vectorWordsFile = os.path.join(parentdir, "data", "vector_words_50_corpora_clean.txt")
+    
+    main(corporaDir, vectorDiscoursesFile, vectorWordsFile)
