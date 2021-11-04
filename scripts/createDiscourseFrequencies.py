@@ -43,8 +43,6 @@ def main(corporaDir, vectorDiscourseFile):
     jsonData = dict()
     vectorDiscourses = loadVectorDiscourses(vectorDiscourseFile)
     for filename in os.listdir(corporaDir):
-        if i == 15:
-            break
         if filename.endswith(".csv"):
             if (i%10 == 0):
                 print("--- %s seconds ---" % (time.time() - start_time))
