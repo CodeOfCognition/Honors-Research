@@ -23,56 +23,56 @@ Key terms:
     - discourse vector: a vector containing the set of all subreddits (discourses) used across a given set of corpora
     - vector discourses: the discourses (subreddits) in a discourse vector
 
-Models (located in src directory):
+-------------------------------
 
-UWF.py
-Inputs: 
-    - directory containing cleaned corpora (flag -c)
+## Models (Located In Src Directory):
+
+#### UWF.py
+###### Inputs: directory containing cleaned corpora (flag -c)
     - word vector file (flag -v)
     - the number of arguments to pass in (flag -n)
     - boolean indicating whether to run the control. Pass 0 for false, 1 for true (flag -control)
-Outputs:
+###### Outputs:
     - file containing vector cosines for each corpus processed
     - average and standard error across corpora (printed to terminal)
     - 6 histograms: each for a different quantile pair. Histograms show cosine similaritie values for all processed corpora.
-Notes: 
+###### Notes: 
     - Before running this model, you must have ran createWordVector.py and cleanCorpora.py
     - To adjust histogram domain/co-domain, you must hardcode it. The current specifications are optimized to process the set of 5200 corpora used in this study.
 
-DWF.py
-Input:
+#### DWF.py
+###### Input:
     - directory containing cleaned corpora (flag -c)
     - word vector file (flag -v)
-Output:
+###### Output:
     - file containing vector cosines for each corpus processed
     - average and standard error across corpora (printed to terminal)
     - 6 histograms: each for a different quantile pair. Histograms show cosine similaritie values for all processed corpora.
-Notes: 
+###### Notes: 
     - Before running this model, you must have ran createWordVector.py, cleanCorpora.py, and createDWFCorpora.py (in that order)
     - To adjust histogram domain/co-domain, you must hardcode it. The current specifications are optimized to process the set of 5200 corpora used in this study. 
 
-UDF.py
-Input:
+#### UDF.py
+###### Input:
     - directory containing cleaned corpora (flag -c)
     - discourse vector file (flag -v)
-Output:
+###### Output:
     - file containing vector cosines for each corpus processed
     - average and standard error across corpora (printed to terminal)
     - 6 histograms: each for a different quantile pair. Histograms show cosine similaritie values for all processed corpora.
-Notes: 
+###### Notes: 
     - Before running this model, you must have ran cleanCorpora.py, createDiscourseVector.py
     - To adjust histogram domain/co-domain, you must hardcode it. The current specifications are optimized to process the set of 5200 corpora used in this study. 
 
-WFxDF.py
-Input:
+#### WFxDF.py
+###### Input:
     - directory containing cleaned corpora (flag -c)
     - word vector file (-vw)
     - integer that specifies bin size (-b) 
-Output:
+###### Output:
     - csv file containing 5*(bin size) discourse frequency and word frequency values taken between pairs of corpora.
-Notes:
+###### Notes:
     - There are five bins evenly distributed over range (0,1) of discourse frequency. The bin size refers to the value of **each** of these 5 bins.
-
 -------------------------------
 
 Scripts:
