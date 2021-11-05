@@ -5,6 +5,7 @@ import nltk
 from scipy import spatial
 import random
 import os
+import argparse
 import math
 import time
 import matplotlib.pyplot as plt
@@ -116,16 +117,16 @@ def main(corporaDir, vectorWordsFile):
 if __name__ == "__main__":
     ### File input arguments ###
 
-    # #Parse arguments from command line
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-c', '--corpora_directory')
-    # parser.add_argument('-v', '--vector_words_file')
-    # args = parser.parse_args()
-    # corporaDir = args.corpora_directory
-    # vectorWordsFile = args.vector_words_file
+    #Parse arguments from command line
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--corpora_directory')
+    parser.add_argument('-v', '--vector_words_file')
+    args = parser.parse_args()
+    corporaDir = args.corpora_directory
+    vectorWordsFile = args.vector_words_file
 
-    corporaDir = "/Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_50_corpora_clean"
-    vectorWordsFile = "/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt"
+    # corporaDir = "/Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_50_corpora_clean"
+    # vectorWordsFile = "/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt"
 
     start_time = time.time()
 

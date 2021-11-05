@@ -19,7 +19,7 @@ def loadVectorDiscourses(vectorDiscoursesFile):
         f.close
     return vectorDiscourses
 
-def loadCorpus(corpus, vectorDiscourses):
+def loadCorpus(corpus):
     df = pd.read_csv(corpus, header=None)
     df.columns = ["time", "subreddit", "wc", "comment"]
     df = df.sort_values('time', ascending=(True)).reset_index()
@@ -119,7 +119,7 @@ def writeResults(corporaDir, cosineValues):
 
 def runFile(corpus, vectorDiscourses):
 
-    df = loadCorpus(corpus, vectorDiscourses)
+    df = loadCorpus(corpus)
     results = createQuantiles(vectorDiscourses, df)
     dictionary1, dictionary2, dictionary3, dictionary4 = results[0], results[1], results[2], results[3]
     discourseCounts = getDiscourseCounts(dictionary1, dictionary2, dictionary3, dictionary4)
