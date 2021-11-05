@@ -16,10 +16,10 @@ def loadVectorDiscourses(vectorDiscourseFile):
 
 def createDFVector(vectorDiscourses, dataframe):
     zeros = [0]*len(vectorDiscourses)
-    d = dict(zip(vectorDiscourses, zeros)) 
+    d = dict(zip(vectorDiscourses, zeros))
     for index, row in dataframe.iterrows():
         key = dataframe['subreddit'][index]
-        d[key] += 1
+        d[str(key)] += 1
     return list(d.values())
 
 def runFile(corpusDir, vectorDiscourses):
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     # corporaDir = args.corpora_directory
     # vectorDiscoursesFile = args.vector_discourses_file
 
-    corporaDir = os.path.join(parentdir, "data", "corpora", "50_corpora_clean")
-    vectorDiscoursesFile = os.path.join(parentdir, "data", "vector_discourses_50_corpora_clean.txt")
+    corporaDir = os.path.join(parentdir, "data", "corpora", "5200_corpora_clean")
+    vectorDiscoursesFile = os.path.join(parentdir, "data", "vector_discourses_5200_corpora_clean.txt")
     
     main(corporaDir, vectorDiscoursesFile)

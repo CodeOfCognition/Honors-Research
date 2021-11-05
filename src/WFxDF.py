@@ -126,14 +126,26 @@ def main(corporaDir, vectorWordsFile, binSize):
             corpusList.append(file)
 
     dfwfPairs = list()
-    for i in range(len(corpusList)):
-        if (discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) % 10 == 0:
-            print(f"--- {round((time.time() - start_time), 2)} seconds ---")
-            print(f"Bins: [ {discFreqBins[0]}  {discFreqBins[1]} {discFreqBins[2]} {discFreqBins[3]} {discFreqBins[4]}] (capacity: {binSize}")
-        results = runFile(i, corporaDir, corpusList, setOfUsedPairs, vectorWords, dictOfDiscourseVectors, discFreqBins, binSize)
-        wfVC, dfVC, discFreqBins, listOfUsedPairs, isUsable = results[0], results[1], results[2], results[3], results[4]
-        if isUsable:
-            dfwfPairs.append((dfVC, wfVC))
+    toPrint = True
+    n = 1
+    while (discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) < (5*binSize):
+        for i in range(len(corpusList)):
+            if i % 250 == 0:
+                print(f"Iteration {n}; file: {i}")
+            if toPrint and ((discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) % 5 == 0):
+                print(f"--- {round((time.time() - start_time), 2)} seconds ---")
+                print(f"Bins: [ {discFreqBins[0]}  {discFreqBins[1]} {discFreqBins[2]} {discFreqBins[3]} {discFreqBins[4]}] (capacity: {binSize}")
+            results = runFile(i, corporaDir, corpusList, setOfUsedPairs, vectorWords, dictOfDiscourseVectors, discFreqBins, binSize)
+            wfVC, dfVC, discFreqBins, listOfUsedPairs, isUsable = results[0], results[1], results[2], results[3], results[4]
+            if isUsable:
+                dfwfPairs.append((dfVC, wfVC))
+                toPrint = True
+            else:
+                toPrint = False
+
+            if (discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) == (5*binSize):
+                break
+        n += 1
     
     with open(os.path.join(parentdir, "data", "results", f"wf_df_{corporaDirName}.csv"), "wt") as f:
         writer = csv.writer(f)
@@ -161,6 +173,6 @@ if __name__ == "__main__":
 
     corporaDir = os.path.join(parentdir, "data", "corpora", "5200_corpora_clean")
     vectorWordsFile = os.path.join(parentdir, "data", "vector_words_5200_corpora.txt")
-    binSize = 10
+    binSize = 250
     
     main(corporaDir, vectorWordsFile, binSize)
