@@ -106,6 +106,12 @@ def runFile(i, corporaDir, corpusList, setOfUsedPairs, vectorWords, dictOfDiscou
     wfVC = getWordFrequency(corpus1, corpus2, vectorWords, corporaDir)
     return wfVC, dfVC, discFreqBins, setOfUsedPairs, isUsable
 
+def exportResults(dfwfPairs, corporaDirName):
+    with open(os.path.join(parentdir, "data", "results", f"wf_df_{corporaDirName}.csv"), "wt") as f:
+        writer = csv.writer(f)
+        writer.writerow(["df similarity", "wf similarity"])
+        for pair in dfwfPairs:
+            writer.writerow([pair[0], pair[1]])
 
 def main(corporaDir, vectorWordsFile, binSize):
 
@@ -125,33 +131,33 @@ def main(corporaDir, vectorWordsFile, binSize):
         if file.endswith(".csv"):
             corpusList.append(file)
 
+     # The code below continually calls runFile() until all bins are filled. It also prints progress updates to the standard out.
+
     dfwfPairs = list()
-    toPrint = True
-    n = 1
+    toPrint = True #controls whether or not to print bin contents
+    n = 1 # keeps track of how many iterations through all corpora have occurred (current iteration)
+    # iterate through all corpora continually until all bins are full
     while (discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) < (5*binSize):
         for i in range(len(corpusList)):
             if i % 250 == 0:
-                print(f"Iteration {n}; file: {i}")
+                print(f"Iteration {n}, file: {i}")
             if toPrint and ((discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) % 5 == 0):
                 print(f"--- {round((time.time() - start_time), 2)} seconds ---")
-                print(f"Bins: [ {discFreqBins[0]}  {discFreqBins[1]} {discFreqBins[2]} {discFreqBins[3]} {discFreqBins[4]}] (capacity: {binSize}")
+                print(f"Bins: [ {discFreqBins[0]} {discFreqBins[1]} {discFreqBins[2]} {discFreqBins[3]} {discFreqBins[4]} ] (bin capactiy: {binSize})")
             results = runFile(i, corporaDir, corpusList, setOfUsedPairs, vectorWords, dictOfDiscourseVectors, discFreqBins, binSize)
-            wfVC, dfVC, discFreqBins, listOfUsedPairs, isUsable = results[0], results[1], results[2], results[3], results[4]
+            wfVC, dfVC, discFreqBins, setOfUsedPairs, isUsable = results[0], results[1], results[2], results[3], results[4]
             if isUsable:
                 dfwfPairs.append((dfVC, wfVC))
-                toPrint = True
+                toPrint = True # allows new results to print
             else:
-                toPrint = False
+                toPrint = False # blocks printing same results
 
             if (discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) == (5*binSize):
                 break
         n += 1
     
-    with open(os.path.join(parentdir, "data", "results", f"wf_df_{corporaDirName}.csv"), "wt") as f:
-        writer = csv.writer(f)
-        writer.writerow(["df similarity", "wf similarity"])
-        for pair in dfwfPairs:
-            writer.writerow([pair[0], pair[1]])
+    exportResults(dfwfPairs, corporaDirName)
+    print(f"WFxDF.py finished running in {round((time.time() - start_time), 2)} seconds. Results are written to the data/results directory.")
         
     
 
@@ -173,6 +179,6 @@ if __name__ == "__main__":
 
     corporaDir = os.path.join(parentdir, "data", "corpora", "5200_corpora_clean")
     vectorWordsFile = os.path.join(parentdir, "data", "vector_words_5200_corpora.txt")
-    binSize = 250
+    binSize = 10
     
     main(corporaDir, vectorWordsFile, binSize)
