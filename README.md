@@ -33,7 +33,7 @@ working_directory
 ├── scripts/  
 ├── src/  
 
-* Note: models should be in src folder and scripts should be in scripts folder.
+\* Note: models should be in src folder and scripts should be in scripts folder.
 
 #### Key terms:
   - **word vector**: a vector of the most 150,000 common words across a given set of corpora
