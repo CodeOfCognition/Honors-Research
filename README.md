@@ -3,15 +3,15 @@
 ## Table of Contents
 1. [General Notes](#General-Notes)  
 2. [Models](#Models)  
-  * a. [DWF](#DWF.py)  
-  + b. [UWF](#UWF.py)  
-c. [UDF](#UDF.py)  
+a. [DWF](#DWFpy)  
+b. [UWF](#UWFpy)  
+c. [UDF](#UDFpy)  
 3. [Scripts](#Scripts)  
-a. [createWordVector.py](#createWordVector.py)  
-b. [cleanCorpora.py](#cleanCorpora.py)  
-c. [createDWFCorpora.py](#createDWFCorpora.py)  
-d. [createDiscourseVector.py](#createDiscourseVector.py)  
-e. [createDiscourseFrequencies.py](#createDiscourseFrequencies.py)  
+a. [createWordVector.py](#createWordVectorpy)  
+b. [cleanCorpora.py](#cleanCorporapy)  
+c. [createDWFCorpora.py](#createDWFCorporapy)  
+d. [createDiscourseVector.py](#createDiscourseVectorpy)  
+e. [createDiscourseFrequencies.py](#createDiscourseFrequenciespy)  
 
 
 
