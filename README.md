@@ -3,8 +3,8 @@
 ## Table of Contents
 1. [General Notes](#General-Notes)  
 2. [Models](#Models)  
-a. [DWF](#DWF.py)  
-b. [UWF](#UWF.py)  
+* a. [DWF](#DWF.py)  
++ b. [UWF](#UWF.py)  
 c. [UDF](#UDF.py)  
 3. [Scripts](#Scripts)  
 a. [createWordVector.py](#createWordVector.py)  
