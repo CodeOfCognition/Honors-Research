@@ -1,7 +1,7 @@
 #Honors-Research
 
 ## Table of Contents
-1. [General Notes](#General Notes)  
+1. [General Notes](#General-Notes)  
 2. [Models](#Models)  
 a. [DWF](#DWF.py)  
 b. [UWF](#UWF.py)  
@@ -15,22 +15,22 @@ e. [createDiscourseFrequencies.py](#createDiscourseFrequencies.py)
 
 
 
-### General Notes
+### General-Notes
 
 
-##### Important Note Before Running Code:
+#### Important Note Before Running Code:
 - All models are expected to be ran in the command line from "working_directory". Please make sure you have the following directory structure before running any files. 
 - Before running any models, first run the createWordVector.py and subsequently the cleanCorpora.py scripts once.
 - When running scripts/models, input arguments expect flags. For example, a file may run as "python3 fileName.py -c data/corpora/myCorpus". Run "python3 fileName.py -h" for information about flags and input arguments.
 
-##### Directory structure
+#### Directory structure
 
-working_directory
-├── data/
-&emsp;&emsp;├── corpora/
-&emsp;&emsp;├── results/
-├── scripts/
-├── src/
+working_directory  
+├── data/  
+&emsp;&emsp;├── corpora/  
+&emsp;&emsp;├── results/  
+├── scripts/  
+├── src/  
 
 #### Key terms:
   - **word vector**: a vector of the most 150,000 common words across a given set of corpora
