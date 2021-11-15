@@ -6,6 +6,7 @@
 a. [DWF](#DWFpy)  
 b. [UWF](#UWFpy)  
 c. [UDF](#UDFpy)  
+d. [WFxDF](#WFxDFpy)
 3. [Scripts](#Scripts)  
 a. [createWordVector.py](#createWordVectorpy)  
 b. [cleanCorpora.py](#cleanCorporapy)  
