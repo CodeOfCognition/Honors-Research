@@ -36,18 +36,18 @@ def createQuantiles(listedData, vectorWords):
     dictionary4 = dict(zip(vectorWords, zeros)) 
 
     for i in range(totalWords):
-        uniqueWords.add(listedData[i])
+        uniqueWords.add(str(listedData[i]))
         if i <= (totalWords//4):
-            dictionary1[listedData[i]] += 1
+            dictionary1[str(listedData[i])] += 1
             check += 1
         elif i <= ((totalWords)//2):
-            dictionary2[listedData[i]] += 1
+            dictionary2[str(listedData[i])] += 1
             check += 1
         elif i <= ((3*totalWords)//4):
-            dictionary3[listedData[i]] += 1
+            dictionary3[str(listedData[i])] += 1
             check += 1
         else:
-            dictionary4[listedData[i]] += 1
+            dictionary4[str(listedData[i])] += 1
             check += 1
     if(len(uniqueWords) < 5000):
         return 0,0,0,0,False

@@ -25,6 +25,9 @@ def importData(corpus, runControl):
         df = df.sort_values('time', ascending=(True)).reset_index()
     else:
         df = df.sample(frac=1)
+    # df_len = len(df["time"])
+    # df = df.iloc[(2*(df_len//3)):(df_len - 1)]
+    # df_len = len(df["time"])
     return df
 
 def getRandomSamples(df, vectorWords):
@@ -32,7 +35,10 @@ def getRandomSamples(df, vectorWords):
     listedData = listedData.split(' ')[:-1]
     totalWords = len(listedData)
 
-    toAdd = random.sample(range(totalWords), 100000)
+    try:
+        toAdd = random.sample(range(totalWords), 100000)
+    except ValueError: # occurs if corpus has <100,000 words which shouldn't happen in the standard implementation with 5200 corpora. This was used mostly for other testing
+        return []
     toAdd.sort()
     newListedData = list()
     for i in toAdd:
@@ -53,18 +59,18 @@ def createQuantiles(vectorWords, listedData, corpus):
     uniqueWords = set()
 
     for i in range(totalWords):
-        uniqueWords.add(listedData[i])
+        uniqueWords.add(str(listedData[i]))
         if i <= (totalWords//4):
-            dictionary1[listedData[i]] += 1
+            dictionary1[str(listedData[i])] += 1
             check += 1
         elif i <= ((totalWords)//2):
-            dictionary2[listedData[i]] += 1
+            dictionary2[str(listedData[i])] += 1
             check += 1
         elif i <= ((3*totalWords)//4):
-            dictionary3[listedData[i]] += 1
+            dictionary3[str(listedData[i])] += 1
             check += 1
         else:
-            dictionary4[listedData[i]] += 1
+            dictionary4[str(listedData[i])] += 1
             check += 1
     if(len(uniqueWords) < 5000):
         return 0,0,0,0,-1 # indicates corpus quantiles were not created
@@ -103,6 +109,8 @@ def runFile(corpus, vectorWords, runControl):
     df = importData(corpus, runControl)
 
     listedData = getRandomSamples(df, vectorWords) #gets 100,000 randomly sampled words
+    if listedData == []:
+        return 0, []
 
     results = createQuantiles(vectorWords, listedData, corpus)
     if results[4] == -1:
@@ -130,6 +138,7 @@ def runNFiles(corporaDir, vectorWords, runControl, n):
             cosineValues.append(results[1])
         if i > n:
             return cosineValues
+    return cosineValues
 
 def main(corporaDir, vectorWordsFile, runControl, n):
 
@@ -159,7 +168,7 @@ if __name__ == "__main__":
     corporaDir = "/Users/robdow/Desktop/honors research/Coding/data/corpora/5200_corpora_clean"
     vectorWordsFile = "/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt"
     runControl = False
-    n = 25
+    n = 2825
 
     start_time = time.time()
 
