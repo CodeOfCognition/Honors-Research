@@ -9,7 +9,7 @@ import time
 import matplotlib.pyplot as plt
 import random
 import argparse
-from analyzeAndGraph import analyze, genHistogram
+from analyzeAndGraph import analyze, genHistogram 
 
 def loadVectorWords(vectorWordsFile):
     with open(vectorWordsFile, "rt") as f:
