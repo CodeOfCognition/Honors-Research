@@ -135,12 +135,12 @@ def main(corporaDir, vectorWordsFile, binSize):
 
     dfwfPairs = list()
     toPrint = True #controls whether or not to print bin contents
-    n = 1 # keeps track of how many iterations through all corpora have occurred (current iteration)
+    c = 1 # keeps track of how many cycles through all corpora have occurred (current iteration)
     # iterate through all corpora continually until all bins are full
     while (discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) < (5*binSize):
         for i in range(len(corpusList)):
             if i % 250 == 0:
-                print(f"Iteration {n}, file: {i}")
+                print(f"Iteration {c}, file: {i}")
             if toPrint and ((discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) % 5 == 0):
                 print(f"--- {round((time.time() - start_time), 2)} seconds ---")
                 print(f"Bins: [ {discFreqBins[0]} {discFreqBins[1]} {discFreqBins[2]} {discFreqBins[3]} {discFreqBins[4]} ] (bin capactiy: {binSize})")
@@ -154,7 +154,7 @@ def main(corporaDir, vectorWordsFile, binSize):
 
             if (discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) == (5*binSize):
                 break
-        n += 1
+        c += 1
     
     exportResults(dfwfPairs, corporaDirName)
     print(f"WFxDF.py finished running in {round((time.time() - start_time), 2)} seconds. Results are written to the data/results directory.")
@@ -164,7 +164,7 @@ def main(corporaDir, vectorWordsFile, binSize):
 if __name__ == "__main__":
 
     start_time = time.time()
-    print("Running model: WFxDF.py")
+    print("Running model: BU-WFxDF.py")
 
     # # Parse arguments from command line
     # parser = argparse.ArgumentParser()

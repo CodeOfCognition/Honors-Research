@@ -168,7 +168,7 @@ if __name__ == "__main__":
     corporaDir = "/Users/robdow/Desktop/honors research/Coding/data/corpora/5200_corpora_clean"
     vectorWordsFile = "/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt"
     runControl = False
-    n = 2825
+    n = 2827
 
     start_time = time.time()
 
