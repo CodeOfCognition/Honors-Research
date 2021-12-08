@@ -36,41 +36,84 @@ def selectTwoCorpora(i, setOfUsedPairs, corpusList):
     setOfUsedPairs.add((i, i2))
     return setOfUsedPairs, corpusList[i], corpusList[i2]
 
-def getDiscourseFrequency(corpus1, corpus2, discFreqBins, dictOfDiscourseVectors, binSize):
+def getDiscourseFrequency(corpus1, corpus2, discFreqBins, dictOfDiscourseVectors, binSize, aveDiscsPerBin):
 
     vector1 = dictOfDiscourseVectors[corpus1]
     vector2 = dictOfDiscourseVectors[corpus2]
+    numDiscs1 = len(set(vector1)) - 1 # calculates number of discourses contributed to
+    numDiscs2 = len(set(vector2)) - 1 # calculates number of discourses contributed to
     dfVC = 1-spatial.distance.cosine(vector1, vector2) #discourse frequency vector cosine
-    if dfVC < 0.2:
+    if dfVC < 0.1:
         if discFreqBins[0] < binSize:
             discFreqBins[0] += 1
-            return discFreqBins, dfVC, True
+            aveDiscsPerBin[0] = aveDiscsPerBin[0] + numDiscs1 + numDiscs2
+            return discFreqBins, aveDiscsPerBin, dfVC, True
         else:
-            return discFreqBins, dfVC, False
-    elif dfVC < 0.4:
+            return discFreqBins, aveDiscsPerBin, dfVC, False
+    elif dfVC < 0.2:
         if discFreqBins[1] < binSize:
             discFreqBins[1] += 1
-            return discFreqBins, dfVC, True
+            aveDiscsPerBin[1] = aveDiscsPerBin[1] + numDiscs1 + numDiscs2
+            return discFreqBins, aveDiscsPerBin, dfVC, True
         else:
-            return discFreqBins, dfVC, False
-    elif dfVC < 0.6:
+            return discFreqBins, aveDiscsPerBin, dfVC, False
+    elif dfVC < 0.3:
         if discFreqBins[2] < binSize:
             discFreqBins[2] += 1
-            return discFreqBins, dfVC, True
+            aveDiscsPerBin[2] = aveDiscsPerBin[2] + numDiscs1 + numDiscs2
+            return discFreqBins, aveDiscsPerBin, dfVC, True
         else:
-            return discFreqBins, dfVC, False
-    elif dfVC < 0.8:
+            return discFreqBins, aveDiscsPerBin, dfVC, False
+    elif dfVC < 0.4:
         if discFreqBins[3] < binSize:
             discFreqBins[3] += 1
-            return discFreqBins, dfVC, True
+            aveDiscsPerBin[3] = aveDiscsPerBin[3] + numDiscs1 + numDiscs2
+            return discFreqBins, aveDiscsPerBin, dfVC, True
         else:
-            return discFreqBins, dfVC, False
-    else:
+            return discFreqBins, aveDiscsPerBin, dfVC, False
+    elif dfVC < 0.5:
         if discFreqBins[4] < binSize:
             discFreqBins[4] += 1
-            return discFreqBins, dfVC, True
+            aveDiscsPerBin[4] = aveDiscsPerBin[4] + numDiscs1 + numDiscs2
+            return discFreqBins, aveDiscsPerBin, dfVC, True
         else:
-            return discFreqBins, dfVC, False
+            return discFreqBins, aveDiscsPerBin, dfVC, False
+    elif dfVC < 0.6:
+        if discFreqBins[5] < binSize:
+            discFreqBins[5] += 1
+            aveDiscsPerBin[5] = aveDiscsPerBin[5] + numDiscs1 + numDiscs2
+            return discFreqBins, aveDiscsPerBin, dfVC, True
+        else:
+            return discFreqBins, aveDiscsPerBin, dfVC, False
+    elif dfVC < 0.7:
+        if discFreqBins[6] < binSize:
+            discFreqBins[6] += 1
+            aveDiscsPerBin[6] = aveDiscsPerBin[6] + numDiscs1 + numDiscs2
+            return discFreqBins, aveDiscsPerBin, dfVC, True
+        else:
+            return discFreqBins, aveDiscsPerBin, dfVC, False
+    elif dfVC < 0.8:
+        if discFreqBins[7] < binSize:
+            discFreqBins[7] += 1
+            aveDiscsPerBin[7] = aveDiscsPerBin[7] + numDiscs1 + numDiscs2
+            return discFreqBins, aveDiscsPerBin, dfVC, True
+        else:
+            return discFreqBins, aveDiscsPerBin, dfVC, False
+    elif dfVC < 0.9:
+        if discFreqBins[8] < binSize:
+            discFreqBins[8] += 1
+            aveDiscsPerBin[8] = aveDiscsPerBin[8] + numDiscs1 + numDiscs2
+            return discFreqBins, aveDiscsPerBin, dfVC, True
+        else:
+            return discFreqBins, aveDiscsPerBin, dfVC, False
+    else:
+        if discFreqBins[9] < binSize:
+            discFreqBins[9] += 1
+            aveDiscsPerBin[9] = aveDiscsPerBin[9] + numDiscs1 + numDiscs2
+            return discFreqBins, aveDiscsPerBin, dfVC, True
+        else:
+            return discFreqBins, aveDiscsPerBin, dfVC, False
+ 
 
 def getWordFrequency(corpus1, corpus2, vectorWords, corporaDir):
 
@@ -97,17 +140,17 @@ def getWordFrequency(corpus1, corpus2, vectorWords, corporaDir):
     wfVC = 1-spatial.distance.cosine(wordVector1, wordVector2) #word frequency vector cosine
     return wfVC
 
-def runFile(i, corporaDir, corpusList, setOfUsedPairs, vectorWords, dictOfDiscourseVectors, discFreqBins, binSize):
+def runFile(i, corporaDir, corpusList, setOfUsedPairs, vectorWords, dictOfDiscourseVectors, discFreqBins, binSize, aveDiscsPerBin):
 
     setOfUsedPairs, corpus1, corpus2 = selectTwoCorpora(i, setOfUsedPairs, corpusList)
-    discFreqBins, dfVC, isUsable = getDiscourseFrequency(corpus1, corpus2, discFreqBins, dictOfDiscourseVectors, binSize)
+    discFreqBins, aveDiscsPerBin, dfVC, isUsable = getDiscourseFrequency(corpus1, corpus2, discFreqBins, dictOfDiscourseVectors, binSize, aveDiscsPerBin)
     if not isUsable:
-        return 0,0,discFreqBins,setOfUsedPairs,False
+        return 0,0,discFreqBins,aveDiscsPerBin, setOfUsedPairs,False
     wfVC = getWordFrequency(corpus1, corpus2, vectorWords, corporaDir)
-    return wfVC, dfVC, discFreqBins, setOfUsedPairs, isUsable
+    return wfVC, dfVC, discFreqBins, aveDiscsPerBin, setOfUsedPairs, isUsable
 
 def exportResults(dfwfPairs, corporaDirName):
-    with open(os.path.join(parentdir, "data", "results", f"wf_df_{corporaDirName}.csv"), "wt") as f:
+    with open(os.path.join(parentdir, "data", "results", f"wf_df_{corporaDirName}_v2.csv"), "wt") as f:
         writer = csv.writer(f)
         writer.writerow(["df similarity", "wf similarity"])
         for pair in dfwfPairs:
@@ -122,7 +165,8 @@ def main(corporaDir, vectorWordsFile, binSize):
     vectorWords = loadVectorWords(vectorWordsFile)
     dictOfDiscourseVectors = loadUserDiscourseVectors(corporaDirName)
     setOfUsedPairs = set()
-    discFreqBins = [0,0,0,0,0] # holds the number of processed discourse frequency across range of possible similarity values (0.0-0.1, 0.1-0.2, ... 0.9-1.0)
+    discFreqBins = [0,0,0,0,0,0,0,0,0,0] # holds the number of processed discourse frequency across range of possible similarity values (0.0-0.1, 0.1-0.2, ... 0.9-1.0)
+    aveDiscsPerBin = [0,0,0,0,0,0,0,0,0,0] # holds average discourses per bin. First aggregated, then averaged by dividing each bin by size.
 
     #gets list of corpus file names
     dirContents = os.listdir(corporaDir)
@@ -137,25 +181,29 @@ def main(corporaDir, vectorWordsFile, binSize):
     toPrint = True #controls whether or not to print bin contents
     c = 1 # keeps track of how many cycles through all corpora have occurred (current iteration)
     # iterate through all corpora continually until all bins are full
-    while (discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) < (5*binSize):
+    while (discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4] + discFreqBins[5] + discFreqBins[6] + discFreqBins[7] + discFreqBins[8] + discFreqBins[9] < (10*binSize)):
         for i in range(len(corpusList)):
-            if i % 500 == 0:
-                print(f"Iteration {c}, file: {i}")
-            if toPrint and ((discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) % 50 == 0):
+            if i == 0:
+                print(f"Cycle {c}")
+            if toPrint and ((discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4] + discFreqBins[5] + discFreqBins[6] + discFreqBins[7] + discFreqBins[8] + discFreqBins[9]) % 5 == 0):
                 print(f"--- {round((time.time() - start_time), 2)} seconds ---")
-                print(f"Bins: [ {discFreqBins[0]} {discFreqBins[1]} {discFreqBins[2]} {discFreqBins[3]} {discFreqBins[4]} ] (bin capactiy: {binSize})")
-            results = runFile(i, corporaDir, corpusList, setOfUsedPairs, vectorWords, dictOfDiscourseVectors, discFreqBins, binSize)
-            wfVC, dfVC, discFreqBins, setOfUsedPairs, isUsable = results[0], results[1], results[2], results[3], results[4]
+                print(f"Bins: [ {discFreqBins[0]} {discFreqBins[1]} {discFreqBins[2]} {discFreqBins[3]} {discFreqBins[4]} {discFreqBins[5]} {discFreqBins[6]} {discFreqBins[7]} {discFreqBins[8]} {discFreqBins[9]} ] (bin capactiy: {binSize})")
+            results = runFile(i, corporaDir, corpusList, setOfUsedPairs, vectorWords, dictOfDiscourseVectors, discFreqBins, binSize, aveDiscsPerBin)
+            wfVC, dfVC, discFreqBins, aveDiscsPerBin, setOfUsedPairs, isUsable = results[0], results[1], results[2], results[3], results[4], results[5]
             if isUsable:
                 dfwfPairs.append((dfVC, wfVC))
                 toPrint = True # allows new results to print
             else:
                 toPrint = False # blocks printing same results
 
-            if (discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4]) == (5*binSize):
+            if (discFreqBins[0] + discFreqBins[1] + discFreqBins[2] + discFreqBins[3] + discFreqBins[4] + discFreqBins[5] + discFreqBins[6] + discFreqBins[7] + discFreqBins[8] + discFreqBins[9]) == (10*binSize):
                 break
         c += 1
     
+    finalBinAves = list()
+    for b in aveDiscsPerBin:
+        finalBinAves.append(b/(binSize*2))
+    print(f"Average discourses used per bin: {finalBinAves}")
     exportResults(dfwfPairs, corporaDirName)
     print(f"WFxDF.py finished running in {round((time.time() - start_time), 2)} seconds. Results are written to the data/results directory.")
         
@@ -179,6 +227,6 @@ if __name__ == "__main__":
 
     corporaDir = os.path.join(parentdir, "data", "corpora", "5200_corpora_clean")
     vectorWordsFile = os.path.join(parentdir, "data", "vector_words_5200_corpora.txt")
-    binSize = 500
+    binSize = 2000
     
     main(corporaDir, vectorWordsFile, binSize)
