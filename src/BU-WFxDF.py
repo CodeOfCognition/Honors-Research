@@ -7,6 +7,7 @@ import time
 import matplotlib.pyplot as plt
 import random
 import csv
+import argparse
 from pathlib import Path
 import os, sys
 parentdir = Path(__file__).parents[1]
@@ -214,19 +215,19 @@ if __name__ == "__main__":
     start_time = time.time()
     print("Running model: BU-WFxDF.py")
 
-    # # Parse arguments from command line
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-c', '--corpora_directory') #expects cleaned corpora 
-    # parser.add_argument('-vw', '--vector_words_file') 
-    # parser.add_argument('-b', '--bin_size') 
-    # args = parser.parse_args()
-    # corporaDir = args.corpora_directory
-    # vectorDiscoursesFile = args.vector_discourses_file
-    # vectorWordsFile = args.vector_words_file
-    # binSize = args.binSize
+    # Parse arguments from command line
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--corpora_directory') #expects cleaned corpora 
+    parser.add_argument('-vw', '--vector_words_file') 
+    parser.add_argument('-b', '--bin_size') 
+    args = parser.parse_args()
+    corporaDir = args.corpora_directory
+    vectorDiscoursesFile = args.vector_discourses_file
+    vectorWordsFile = args.vector_words_file
+    binSize = args.binSize
 
-    corporaDir = os.path.join(parentdir, "data", "corpora", "5200_corpora_clean")
-    vectorWordsFile = os.path.join(parentdir, "data", "vector_words_5200_corpora.txt")
-    binSize = 2000
+    # corporaDir = os.path.join(parentdir, "data", "corpora", "5200_corpora_clean")
+    # vectorWordsFile = os.path.join(parentdir, "data", "vector_words_5200_corpora.txt")
+    # binSize = 2000
     
     main(corporaDir, vectorWordsFile, binSize)

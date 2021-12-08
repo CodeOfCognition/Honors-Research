@@ -95,14 +95,3 @@ print("Above threshold of .97:")
 for file in nineseven:
     print(file)
 
-# Did not remove the following files:
-# /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/BlackPeopleTwitter_DubTeeDub.txt
-# /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/NoStupidQuestions_PM_ME_UR_SCOOTER.txt
-# /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/boardgames_uhhhclem.txt
-# /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/podemos_Hetaroi.txt
-# /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/TumblrInAction_GnuMag.txt
-# /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/exzj_EinDenker.txt
-# /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/childfree_tparkelaine.txt
-# /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/RepublicaArgentina_GalacticLinx.txt
-# /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/relationship_advice_sangetencre.txt
-# /Users/robdow/Desktop/honors research/Coding/data/corpora/DWF_5200_corpora_clean/relationships_baffled_soap.txt

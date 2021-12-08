@@ -153,22 +153,22 @@ def main(corporaDir, vectorWordsFile, runControl, n):
     
 
 if __name__ == "__main__":
-    # #Parse arguments from command line
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-c', '--corpora_directory')
-    # parser.add_argument('-v', '--vector_words_file')
-    # parser.add_argument('-n', '--number_of_trials')
-    # parser.add_argument('-control', '--true_or_false') #must be 0 for false, or 1 for true
-    # args = parser.parse_args()
-    # corporaDir = args.corpora_directory
-    # vectorWordsFile = args.vector_words_file
-    # runControl = int(args.true_or_false)
-    # n = args.number_of_files
+    #Parse arguments from command line
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--corpora_directory')
+    parser.add_argument('-v', '--vector_words_file')
+    parser.add_argument('-n', '--number_of_trials')
+    parser.add_argument('-control', '--true_or_false') #must be 0 for false, or 1 for true
+    args = parser.parse_args()
+    corporaDir = args.corpora_directory
+    vectorWordsFile = args.vector_words_file
+    runControl = int(args.true_or_false)
+    n = args.number_of_files
 
-    corporaDir = "/Users/robdow/Desktop/honors research/Coding/data/corpora/5200_corpora_clean"
-    vectorWordsFile = "/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt"
-    runControl = False
-    n = 2827
+    # corporaDir = "/Users/robdow/Desktop/honors research/Coding/data/corpora/5200_corpora_clean"
+    # vectorWordsFile = "/Users/robdow/Desktop/honors research/Coding/data/vector_words_5200_corpora.txt"
+    # runControl = False
+    # n = 2827
 
     start_time = time.time()
 

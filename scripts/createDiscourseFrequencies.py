@@ -60,14 +60,14 @@ if __name__ == "__main__":
     print("Running script: createDiscourseFrequencies.py")
 
     # # Parse arguments from command line
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-c', '--corpora_directory') #expects cleaned corpora 
-    # parser.add_argument('-v', '--vector_discourses_file') 
-    # args = parser.parse_args()
-    # corporaDir = args.corpora_directory
-    # vectorDiscoursesFile = args.vector_discourses_file
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--corpora_directory') #expects cleaned corpora 
+    parser.add_argument('-v', '--vector_discourses_file') 
+    args = parser.parse_args()
+    corporaDir = args.corpora_directory
+    vectorDiscoursesFile = args.vector_discourses_file
 
-    corporaDir = os.path.join(parentdir, "data", "corpora", "5200_corpora_clean")
-    vectorDiscoursesFile = os.path.join(parentdir, "data", "vector_discourses_5200_corpora_clean.txt")
+    # corporaDir = os.path.join(parentdir, "data", "corpora", "5200_corpora_clean")
+    # vectorDiscoursesFile = os.path.join(parentdir, "data", "vector_discourses_5200_corpora_clean.txt")
     
     main(corporaDir, vectorDiscoursesFile)
