@@ -46,7 +46,8 @@ working_directory
 ## Models
 
 #### UWF.py
-###### Inputs: directory containing cleaned corpora (flag -c)
+###### Inputs: 
+  - directory containing cleaned corpora (flag -c)
   - word vector file (flag -v)
   - the number of arguments to pass in (flag -n)
   - boolean indicating whether to run the control. Pass 0 for false, 1 for true (flag -control)
